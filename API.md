@@ -1,7 +1,6 @@
 # Mercato API Documentation
 
 All requests go through **HTTPS** at `https://localhost` (nginx-ssl → frontend → api-gateway).  
-For direct gateway testing (bypassing SSL): `http://localhost:8080`.
 
 ---
 

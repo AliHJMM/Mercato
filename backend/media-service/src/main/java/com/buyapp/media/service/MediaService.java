@@ -37,18 +37,18 @@ public class MediaService {
 
         String sellerId = getCurrentUserId();
         String objectName = minioService.uploadFile(file);
-        String url = minioService.getPublicUrl(objectName);
 
         Media media = Media.builder()
                 .filename(objectName)
                 .originalFilename(file.getOriginalFilename())
                 .mimeType(file.getContentType())
                 .size(file.getSize())
-                .url(url)
                 .uploadedBy(sellerId)
                 .productId(productId)
                 .build();
 
+        media = mediaRepository.save(media);
+        media.setUrl(buildMediaUrl(media.getId()));
         media = mediaRepository.save(media);
 
         // Publish IMAGE_UPLOADED event
@@ -57,7 +57,7 @@ public class MediaService {
                     .eventType("IMAGE_UPLOADED")
                     .mediaId(media.getId())
                     .filename(objectName)
-                    .url(url)
+                    .url(media.getUrl())
                     .uploadedBy(sellerId)
                     .productId(productId)
                     .timestamp(LocalDateTime.now())
@@ -143,6 +143,10 @@ public class MediaService {
         // SVG starts with <? or <s — allow content-type declaration to pass through
         if (header[0] == '<') return true;
         return false;
+    }
+
+    private String buildMediaUrl(String mediaId) {
+        return "/api/media/images/" + mediaId;
     }
 
     private String getCurrentUserId() {
