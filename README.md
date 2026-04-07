@@ -14,7 +14,7 @@ Buy-01 is a full-featured online marketplace where **sellers** can list products
 ### As a Seller
 - Register as a seller and set up your storefront
 - Create, edit, and delete your product listings
-- Upload product images (JPEG, PNG, GIF — up to 2 MB each)
+- Upload product images (JPEG, PNG, GIF, WebP, SVG — up to 2 MB each)
 - Manage all your uploaded media from one place
 - Update your profile and avatar photo
 - View your seller dashboard with sales stats
@@ -43,9 +43,20 @@ docker compose up --build
 
 **3. Open the app**
 
-Go to **http://localhost** in your browser.
+Go to **https://localhost** in your browser.
 
-That's it! 🎉
+Your browser may show a warning for the local development certificate the first time. Accept it and continue to the site.
+
+That's it!
+
+### API Testing Notes
+
+- Use `https://localhost` for browser and Postman testing.
+- Use the exact endpoint path without a trailing slash.
+- Example: `/api/auth/register`, not `/api/auth/register/`.
+- For image upload, send `multipart/form-data` with the file field named `file`.
+- Upload responses return image URLs in the form `/api/media/images/{id}`.
+- Full endpoint examples are in `API.md`.
 
 ---
 
@@ -53,14 +64,14 @@ That's it! 🎉
 
 | Page | URL | Who can access |
 |------|-----|----------------|
-| Product Listing | http://localhost | Everyone |
-| Sign In | http://localhost/login | Everyone |
-| Sign Up | http://localhost/register | Everyone |
-| Seller Dashboard | http://localhost/seller/dashboard | Sellers |
-| My Products | http://localhost/seller/products | Sellers |
-| Add Product | http://localhost/seller/products/new | Sellers |
-| Media Manager | http://localhost/seller/media | Sellers |
-| My Profile | http://localhost/profile | Logged-in users |
+| Product Listing | https://localhost | Everyone |
+| Sign In | https://localhost/login | Everyone |
+| Sign Up | https://localhost/register | Everyone |
+| Seller Dashboard | https://localhost/seller/dashboard | Sellers |
+| My Products | https://localhost/seller/products | Sellers |
+| Add Product | https://localhost/seller/products/new | Sellers |
+| Media Manager | https://localhost/seller/media | Sellers |
+| My Profile | https://localhost/profile | Logged-in users |
 
 ---
 
