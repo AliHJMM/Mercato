@@ -1,0 +1,105 @@
+<!-- Header -->
+<div style="background:linear-gradient(135deg,#1A1A2E,#3B82F6);padding:2.5rem 0 5rem">
+  <div class="container">
+    <h1 style="color:#fff;font-size:1.75rem;font-weight:800;letter-spacing:-.03em;margin-bottom:.25rem">
+      <i class="bi bi-cart3 me-2"></i>Your Cart
+    </h1>
+    <p style="color:rgba(255,255,255,.6);margin:0;font-size:.9rem">
+      {{ items.length === 0 ? 'Your cart is empty' : items.length + ' item(s) · $' + (cartService.total | number:'1.2-2') + ' total' }}
+    </p>
+  </div>
+</div>
+
+<div class="container" style="max-width:760px;margin-top:-3rem;padding-bottom:3rem">
+
+  <!-- Empty state -->
+  <div *ngIf="items.length === 0 && !orderPlaced" class="card p-5 text-center fade-in-up">
+    <div style="font-size:4rem;margin-bottom:1rem;color:#D1D5DB"><i class="bi bi-cart-x"></i></div>
+    <h4 class="fw-800 mb-2">Nothing here yet</h4>
+    <p class="text-muted mb-4">Browse the marketplace and add items to your cart.</p>
+    <button class="btn btn-primary px-5" (click)="continueShopping()">
+      <i class="bi bi-bag me-2"></i>Shop Now
+    </button>
+  </div>
+
+  <!-- Order placed confirmation -->
+  <div *ngIf="orderPlaced" class="card p-5 text-center fade-in-up">
+    <div style="font-size:4rem;margin-bottom:1rem;color:#10B981"><i class="bi bi-check-circle-fill"></i></div>
+    <h4 class="fw-800 mb-2">Order Placed!</h4>
+    <p class="text-muted mb-4">Thank you for your order. Stock has been updated.</p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <button class="btn btn-primary px-4" (click)="viewOrders()">
+        <i class="bi bi-bag-check me-2"></i>View My Orders
+      </button>
+      <button class="btn btn-outline-secondary px-4" (click)="continueShopping()">
+        <i class="bi bi-bag me-2"></i>Continue Shopping
+      </button>
+    </div>
+  </div>
+
+  <!-- Cart items -->
+  <div *ngIf="items.length > 0 && !orderPlaced" class="fade-in-up">
+    <div class="card mb-3 p-3" *ngFor="let item of items">
+      <div class="d-flex gap-3 align-items-center">
+
+        <!-- Image -->
+        <div style="width:72px;height:72px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#F3F4F6">
+          <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="item.name"
+               style="width:100%;height:100%;object-fit:cover">
+          <div *ngIf="!item.imageUrl"
+               style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#D1D5DB;font-size:1.5rem">
+            <i class="bi bi-image"></i>
+          </div>
+        </div>
+
+        <!-- Info -->
+        <div class="flex-grow-1 min-width-0">
+          <div class="fw-700" style="font-size:.9375rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            {{ item.name }}
+          </div>
+          <div class="text-muted small">by {{ item.sellerName }}</div>
+          <div class="fw-700 mt-1" style="color:var(--color-primary)">
+            ${{ (item.price * item.quantity) | number:'1.2-2' }}
+          </div>
+        </div>
+
+        <!-- Qty controls -->
+        <div class="d-flex align-items-center gap-1" style="flex-shrink:0">
+          <button class="btn btn-sm" style="width:30px;height:30px;padding:0;border:1px solid #E5E7EB;border-radius:8px"
+                  (click)="decrement(item)">
+            <i class="bi bi-dash"></i>
+          </button>
+          <span class="fw-700" style="min-width:24px;text-align:center">{{ item.quantity }}</span>
+          <button class="btn btn-sm" style="width:30px;height:30px;padding:0;border:1px solid #E5E7EB;border-radius:8px"
+                  (click)="increment(item)">
+            <i class="bi bi-plus"></i>
+          </button>
+        </div>
+
+        <!-- Remove -->
+        <button class="btn btn-sm text-danger" style="flex-shrink:0" (click)="remove(item)" title="Remove">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="card p-4 mt-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-muted">Subtotal ({{ cartService.count }} items)</span>
+        <span class="fw-800 fs-5">${{ cartService.total | number:'1.2-2' }}</span>
+      </div>
+      <button class="btn btn-primary w-100 py-2 mb-2" (click)="placeOrder()" [disabled]="placingOrder">
+        <span *ngIf="placingOrder" class="spinner-border spinner-border-sm me-2"></span>
+        <i *ngIf="!placingOrder" class="bi bi-credit-card me-2"></i>
+        {{ placingOrder ? 'Placing Order...' : 'Place Order' }}
+      </button>
+      <button class="btn w-100 py-2" style="border:1px solid #E5E7EB" (click)="continueShopping()">
+        <i class="bi bi-arrow-left me-2"></i>Continue Shopping
+      </button>
+      <button class="btn btn-link text-danger btn-sm mt-2" (click)="cartService.clearCart()">
+        <i class="bi bi-trash me-1"></i>Clear cart
+      </button>
+    </div>
+  </div>
+</div>

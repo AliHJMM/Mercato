@@ -1,0 +1,149 @@
+<!-- Header -->
+<div style="background:linear-gradient(135deg,#1A1A2E,#7C3AED);padding:2.5rem 0 5rem">
+  <div class="container" style="max-width:660px">
+    <h1 style="color:#fff;font-size:1.75rem;font-weight:800;letter-spacing:-.03em;margin-bottom:.25rem">
+      My Profile
+    </h1>
+    <p style="color:rgba(255,255,255,.6);margin:0;font-size:.9rem">Manage your account settings and personal info</p>
+  </div>
+</div>
+
+<div class="container" style="max-width:660px;margin-top:-3rem;padding-bottom:3rem">
+
+  <div *ngIf="loading" class="card p-5 text-center fade-in-up">
+    <div class="spinner-border text-purple mx-auto mb-3"></div>
+    <div class="text-muted">Loading your profile...</div>
+  </div>
+
+  <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="fade-in-up">
+
+    <!-- ─── Avatar card ─── -->
+    <div class="card mb-4 p-4 text-center">
+      <!-- Avatar display -->
+      <div style="position:relative;display:inline-block;margin:0 auto .875rem">
+        <div style="width:96px;height:96px;border-radius:50%;overflow:hidden;border:3px solid var(--color-primary);margin:0 auto">
+          <img *ngIf="form.get('avatarUrl')?.value"
+               [src]="form.get('avatarUrl')?.value" alt="Avatar"
+               style="width:100%;height:100%;object-fit:cover">
+          <div *ngIf="!form.get('avatarUrl')?.value"
+               style="width:100%;height:100%;background:linear-gradient(135deg,#A78BFA,#7C3AED);display:flex;align-items:center;justify-content:center">
+            <i class="bi bi-person-fill text-white" style="font-size:2.5rem"></i>
+          </div>
+        </div>
+
+        <!-- Role badge -->
+        <div style="position:absolute;bottom:-4px;right:-4px">
+          <span class="badge rounded-pill"
+                [style.background]="authService.currentUser?.role === 'SELLER' ? 'linear-gradient(135deg,#10B981,#059669)' : 'linear-gradient(135deg,#3B82F6,#1D4ED8)'"
+                style="font-size:.7rem;padding:.3rem .6rem;border:2px solid #fff">
+            {{ authService.currentUser?.role }}
+          </span>
+        </div>
+      </div>
+
+      <div class="fw-800 mb-1" style="font-size:1.125rem">{{ authService.currentUser?.username }}</div>
+      <div class="text-muted small mb-3">{{ authService.currentUser?.email }}</div>
+
+      <!-- Avatar upload — SELLER only (media service is seller-restricted) -->
+      <ng-container *ngIf="authService.isSeller()">
+        <div class="d-flex gap-2 justify-content-center flex-wrap">
+          <label class="btn btn-outline-primary btn-sm px-3" style="cursor:pointer" [class.disabled]="uploadingAvatar">
+            <span *ngIf="uploadingAvatar" class="spinner-border spinner-border-sm me-1"></span>
+            <i *ngIf="!uploadingAvatar" class="bi bi-upload me-1"></i>
+            {{ uploadingAvatar ? 'Uploading...' : 'Upload from Device' }}
+            <input type="file" class="d-none" accept="image/*"
+                   (change)="onAvatarSelected($event)" [disabled]="uploadingAvatar">
+          </label>
+          <button type="button" class="btn btn-outline-secondary btn-sm px-3" (click)="openMediaPicker()">
+            <i class="bi bi-images me-1"></i>Choose from Media
+          </button>
+        </div>
+        <div class="text-muted mt-1" style="font-size:.75rem">JPEG, PNG — max 2MB</div>
+
+        <!-- Media Picker -->
+        <div *ngIf="showMediaPicker"
+             style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;display:flex;align-items:center;justify-content:center;padding:1rem"
+             (click)="showMediaPicker = false">
+          <div style="background:#fff;border-radius:var(--radius-lg);width:100%;max-width:560px;max-height:75vh;display:flex;flex-direction:column"
+               (click)="$event.stopPropagation()">
+            <div style="padding:1.25rem 1.5rem;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center">
+              <h5 class="fw-800 mb-0">Choose Photo</h5>
+              <button type="button" class="btn-close" (click)="showMediaPicker = false"></button>
+            </div>
+            <div style="padding:1.25rem;overflow-y:auto;flex:1">
+              <div *ngIf="loadingMedia" class="text-center py-4">
+                <div class="spinner-border text-purple"></div>
+              </div>
+              <div *ngIf="!loadingMedia && mediaLibrary.length === 0" class="text-center py-4 text-muted">
+                <i class="bi bi-images fs-2 d-block mb-2"></i>No photos uploaded yet.<br>
+                <small>Upload from device first.</small>
+              </div>
+              <div *ngIf="!loadingMedia && mediaLibrary.length > 0" class="d-flex flex-wrap gap-2">
+                <div *ngFor="let m of mediaLibrary"
+                     style="width:100px;height:100px;border-radius:var(--radius-sm);overflow:hidden;cursor:pointer;border:2px solid #E5E7EB;transition:all .15s"
+                     [style.border-color]="form.get('avatarUrl')?.value === m.url ? 'var(--color-primary)' : '#E5E7EB'"
+                     (click)="selectFromMedia(m.url)"
+                     title="{{ m.originalFilename }}">
+                  <img [src]="m.url" [alt]="m.originalFilename"
+                       style="width:100%;height:100%;object-fit:cover">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- ─── Info card ─── -->
+    <div class="card mb-4 p-4">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <div style="width:32px;height:32px;background:#EDE9FE;border-radius:8px;display:flex;align-items:center;justify-content:center">
+          <i class="bi bi-person text-purple" style="font-size:.9rem"></i>
+        </div>
+        <h5 class="fw-800 mb-0">Account Information</h5>
+      </div>
+
+      <!-- Email (read-only) -->
+      <div class="mb-3">
+        <label class="form-label">Email address</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+          <input type="text" class="form-control" style="background:#F9FAFB;color:var(--color-muted)"
+                 [value]="authService.currentUser?.email || ''" readonly>
+          <span class="input-group-text" style="background:#F9FAFB">
+            <i class="bi bi-lock-fill text-muted" style="font-size:.8rem"></i>
+          </span>
+        </div>
+        <div class="form-text">Email cannot be changed.</div>
+      </div>
+
+      <!-- Username -->
+      <div>
+        <label class="form-label">Username</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-at"></i></span>
+          <input type="text" class="form-control" formControlName="username"
+                 [class.is-invalid]="username.invalid && username.touched">
+          <div class="invalid-feedback">
+            <span *ngIf="username.errors?.['required']">Username is required.</span>
+            <span *ngIf="username.errors?.['minlength']">Must be at least 3 characters.</span>
+            <span *ngIf="username.errors?.['maxlength']">Cannot exceed 50 characters.</span>
+            <span *ngIf="username.errors?.['pattern'] && !username.errors?.['minlength']">Letters only — no numbers or symbols.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Save ─── -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <button type="submit" class="btn btn-primary px-5 py-2" [disabled]="saving">
+        <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+        <i *ngIf="!saving" class="bi bi-check-lg me-2"></i>
+        {{ saving ? 'Saving...' : 'Save Changes' }}
+      </button>
+      <button type="button" class="btn btn-outline-danger btn-sm px-4" (click)="deleteAccount()">
+        <i class="bi bi-trash me-1"></i>Delete Account
+      </button>
+    </div>
+  </form>
+</div>

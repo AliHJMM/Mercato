@@ -1,0 +1,126 @@
+<!-- Page Header -->
+<div style="background:linear-gradient(135deg,#1A1A2E,#3B82F6);padding:2.5rem 0 5rem">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div>
+        <p class="mb-1" style="color:rgba(255,255,255,.6);font-size:.875rem">
+          <i class="bi bi-images me-2"></i>Media Manager
+        </p>
+        <h1 style="color:#fff;font-size:1.75rem;font-weight:800;letter-spacing:-.03em;margin-bottom:.25rem">
+          Your Media Library
+        </h1>
+        <p style="color:rgba(255,255,255,.6);margin:0;font-size:.9rem">
+          {{ media.length }} file{{ media.length !== 1 ? 's' : '' }} uploaded
+        </p>
+      </div>
+      <label class="btn fw-600 px-4"
+             style="background:#fff;color:#3B82F6;cursor:pointer">
+        <i class="bi bi-cloud-upload me-2"></i>Upload Image
+        <input type="file" class="d-none" accept="image/*"
+               (change)="onFileSelected($event)" [disabled]="uploading">
+      </label>
+    </div>
+  </div>
+</div>
+
+<div class="container" style="margin-top:-3rem;padding-bottom:3rem">
+
+  <!-- Upload Card -->
+  <div class="card p-4 mb-4 fade-in-up">
+    <div class="upload-zone"
+         [class.drag-over]="dragOver"
+         (drop)="onDrop($event)"
+         (dragover)="onDragOver($event)"
+         (dragleave)="onDragLeave()">
+      <span class="upload-icon">
+        <i class="bi bi-cloud-arrow-up" [class.text-purple]="!uploading"></i>
+      </span>
+      <div *ngIf="!uploading">
+        <div class="fw-600 mb-1">Drag & drop an image here, or click to browse</div>
+        <div class="text-muted small mb-2">JPEG, PNG, GIF, WebP — max 2MB</div>
+        <label class="btn btn-primary btn-sm px-3" style="cursor:pointer">
+          <i class="bi bi-folder2-open me-1"></i>Choose File
+          <input type="file" class="d-none" accept="image/*" (change)="onFileSelected($event)">
+        </label>
+      </div>
+      <div *ngIf="uploading">
+        <div class="spinner-border text-purple mb-2" style="width:2.5rem;height:2.5rem"></div>
+        <div class="fw-600 text-purple">Uploading...</div>
+        <div class="text-muted small">Please wait</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3">
+    <div class="col" *ngFor="let i of [1,2,3,4,5,6,7,8,9,10]">
+      <div class="card overflow-hidden">
+        <div class="skeleton" style="height:140px"></div>
+        <div class="p-2">
+          <div class="skeleton mb-1" style="height:14px;width:80%"></div>
+          <div class="skeleton" style="height:12px;width:50%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && media.length === 0" class="empty-state fade-in-up">
+    <div class="empty-state-icon" style="background:#EFF6FF;color:#3B82F6"><i class="bi bi-images"></i></div>
+    <h4 class="fw-800 mb-1">No Images Yet</h4>
+    <p class="text-muted mb-0">Upload your first image using the zone above.</p>
+  </div>
+
+  <!-- Image Grid -->
+  <div *ngIf="!loading && media.length > 0"
+       class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3 fade-in-up">
+    <div class="col" *ngFor="let item of media">
+      <div class="card overflow-hidden h-100" style="transition:all .2s"
+           onmouseover="this.style.boxShadow='0 8px 24px rgba(0,0,0,.12)';this.style.transform='translateY(-3px)'"
+           onmouseout="this.style.boxShadow='';this.style.transform=''">
+        <!-- Image -->
+        <div style="position:relative;height:140px;overflow:hidden;background:#F3F4F6;display:flex;align-items:center;justify-content:center">
+          <img [src]="item.url" [alt]="item.originalFilename"
+               style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block"
+               loading="lazy">
+          <!-- MIME badge -->
+          <span style="position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,.6);color:#fff;font-size:.65rem;padding:.2rem .5rem;border-radius:99px;font-weight:600">
+            {{ item.mimeType.split('/')[1].toUpperCase() }}
+          </span>
+        </div>
+
+        <!-- Info -->
+        <div class="p-2">
+          <p class="mb-0 fw-600 text-truncate" style="font-size:.78rem" [title]="item.originalFilename">
+            {{ item.originalFilename }}
+          </p>
+          <p class="mb-0 text-muted" style="font-size:.72rem">{{ formatSize(item.size) }}</p>
+        </div>
+
+        <!-- Actions -->
+        <div class="p-2 pt-0 d-flex gap-1">
+          <button class="btn flex-grow-1"
+                  style="font-size:.75rem;padding:.25rem;border:1px solid #E5E7EB;border-radius:8px"
+                  (click)="copyUrl(item.url)" title="Copy URL">
+            <i class="bi bi-clipboard"></i>
+          </button>
+          <a [href]="item.url" target="_blank"
+             class="btn"
+             style="font-size:.75rem;padding:.25rem .4rem;border:1px solid #E5E7EB;border-radius:8px"
+             title="Open">
+            <i class="bi bi-box-arrow-up-right"></i>
+          </a>
+          <button class="btn btn-outline-danger"
+                  style="font-size:.75rem;padding:.25rem .4rem;border-radius:8px"
+                  (click)="deleteMedia(item)"
+                  [disabled]="deletingId === item.id"
+                  title="Delete">
+            <span *ngIf="deletingId === item.id" class="spinner-border spinner-border-sm" style="width:.75rem;height:.75rem"></span>
+            <i *ngIf="deletingId !== item.id" class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

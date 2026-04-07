@@ -1,0 +1,104 @@
+<div class="auth-page">
+
+  <!-- Illustration side -->
+  <div class="auth-illustration">
+    <div style="position:relative;z-index:1;text-align:center">
+      <div style="font-size:4rem;margin-bottom:1rem">🛍️</div>
+      <h2 style="font-size:2rem;font-weight:800;color:#fff;letter-spacing:-.03em;margin-bottom:.75rem">
+        Welcome back to<br>Mer<span style="color:#F59E0B">cato</span>
+      </h2>
+      <p style="color:rgba(255,255,255,.65);max-width:300px;margin:0 auto;line-height:1.6">
+        Your modern marketplace — buy, sell, and connect with thousands of products.
+      </p>
+      <div class="d-flex gap-3 justify-content-center mt-4 flex-wrap">
+        <div class="hero-stat">
+          <span class="value">Fast</span>
+          <span class="label">Checkout</span>
+        </div>
+        <div class="hero-stat">
+          <span class="value">Safe</span>
+          <span class="label">& Secure</span>
+        </div>
+        <div class="hero-stat">
+          <span class="value">Real</span>
+          <span class="label">Sellers</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form side -->
+  <div class="auth-form-side">
+    <div class="auth-card fade-in-up">
+
+      <!-- Header -->
+      <div class="mb-4">
+        <a routerLink="/" class="d-inline-flex align-items-center gap-2 text-muted mb-4 small">
+          <i class="bi bi-arrow-left"></i> Back to marketplace
+        </a>
+        <h2 class="fw-800 mb-1" style="font-size:1.75rem;letter-spacing:-.03em">Sign in</h2>
+        <p class="text-muted mb-0">Enter your credentials to access your account</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- Email -->
+        <div class="mb-3">
+          <label class="form-label">Email address</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+            <input type="email" class="form-control" formControlName="email"
+                   placeholder="you@example.com"
+                   [class.is-invalid]="email.invalid && email.touched">
+            <div class="invalid-feedback">
+              <span *ngIf="email.errors?.['required']">Email is required.</span>
+              <span *ngIf="email.errors?.['email']">Enter a valid email address (e.g. you&#64;example.com).</span>
+              <span *ngIf="email.errors?.['maxlength']">Email cannot exceed 50 characters.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <label class="form-label mb-0">Password</label>
+          </div>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input [type]="showPassword ? 'text' : 'password'"
+                   class="form-control" formControlName="password"
+                   placeholder="••••••••"
+                   [class.is-invalid]="password.invalid && password.touched">
+            <button type="button" class="btn btn-outline-secondary"
+                    style="border-left:none" (click)="showPassword = !showPassword">
+              <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </button>
+            <div class="invalid-feedback">
+              <span *ngIf="password.errors?.['required']">Password is required.</span>
+              <span *ngIf="password.errors?.['maxlength']">Password cannot exceed 50 characters.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn btn-primary w-100 py-2 mb-3" [disabled]="loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!loading" class="bi bi-box-arrow-in-right me-2"></i>
+          {{ loading ? 'Signing in...' : 'Sign In' }}
+        </button>
+
+        <!-- Divider -->
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <hr class="flex-grow-1 m-0">
+          <span class="text-muted small">or</span>
+          <hr class="flex-grow-1 m-0">
+        </div>
+
+        <p class="text-center text-muted mb-0 small">
+          Don't have an account?
+          <a routerLink="/register" class="text-purple fw-600">Create one for free</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</div>

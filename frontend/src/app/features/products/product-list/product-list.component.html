@@ -1,0 +1,148 @@
+<!-- ─── Hero ─── -->
+<section class="hero">
+  <div class="container position-relative" style="z-index:1">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <div class="hero-badge">
+          <i class="bi bi-stars" style="color:#F59E0B"></i>
+          Mercato — The modern marketplace
+        </div>
+        <h1 class="hero-title">
+          Discover <span class="highlight">Unique Products</span><br>
+          From Real Sellers
+        </h1>
+        <p class="hero-subtitle mt-3 mb-4">
+          Browse products from verified sellers. Find quality items at great prices — all in one place.
+        </p>
+        <div class="d-flex gap-3 flex-wrap">
+          <button *ngIf="!authService.isClient()" class="btn btn-primary px-4 py-2" (click)="onStartSelling()">
+            <i class="bi bi-rocket-takeoff me-2"></i>Start Selling
+          </button>
+          <a href="#products" class="btn px-4 py-2"
+             style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff">
+            <i class="bi bi-bag me-2"></i>Shop Now
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-5 d-none d-lg-block">
+        <div class="d-flex justify-content-center gap-3">
+          <div class="hero-stat">
+            <span class="value">{{ products.length }}</span>
+            <span class="label">Products</span>
+          </div>
+          <div class="hero-stat">
+            <span class="value">100%</span>
+            <span class="label">Secure</span>
+          </div>
+          <div class="hero-stat">
+            <span class="value">24/7</span>
+            <span class="label">Available</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Products Grid ─── -->
+<section class="py-5" id="products">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <h2 class="section-title mb-1">All Products</h2>
+        <div class="section-divider"></div>
+      </div>
+      <span class="text-muted small" *ngIf="!loading">
+        {{ products.length }} item{{ products.length !== 1 ? 's' : '' }} available
+      </span>
+    </div>
+
+    <!-- Skeleton Loading -->
+    <div *ngIf="loading" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+      <div class="col" *ngFor="let i of [1,2,3,4,5,6,7,8]">
+        <div class="card overflow-hidden">
+          <div class="skeleton" style="height:220px"></div>
+          <div class="card-body">
+            <div class="skeleton mb-2" style="height:18px;width:70%"></div>
+            <div class="skeleton mb-3" style="height:14px;width:45%"></div>
+            <div class="d-flex justify-content-between">
+              <div class="skeleton" style="height:22px;width:38%"></div>
+              <div class="skeleton" style="height:22px;width:28%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="error && !loading"
+         class="alert d-flex align-items-center gap-3"
+         style="border-radius:12px;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B">
+      <i class="bi bi-exclamation-circle-fill fs-5"></i>
+      <div>{{ error }}</div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && !error && products.length === 0" class="empty-state fade-in-up">
+      <div class="empty-state-icon"><i class="bi bi-bag-x"></i></div>
+      <h4 class="fw-800 mb-1">No Products Yet</h4>
+      <p class="text-muted mb-4">Be the first to list something on Mercato!</p>
+      <a routerLink="/register" class="btn btn-primary px-4">
+        <i class="bi bi-plus-lg me-2"></i>Start Selling
+      </a>
+    </div>
+
+    <!-- Product Grid -->
+    <div *ngIf="!loading && products.length > 0"
+         class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 fade-in-up">
+      <div class="col" *ngFor="let product of products">
+        <div class="card product-card h-100" style="cursor:pointer" [routerLink]="['/products', product.id]">
+
+          <!-- Image -->
+          <div class="product-card-img-wrap">
+            <img *ngIf="getFirstImage(product)" [src]="getFirstImage(product)" [alt]="product.name" loading="lazy">
+            <div *ngIf="!getFirstImage(product)" class="product-placeholder">
+              <i class="bi bi-image"></i>
+            </div>
+            <span class="product-card-badge" *ngIf="isNew(product)">NEW</span>
+            <div class="product-card-wishlist">
+              <i class="bi bi-eye-fill text-purple"></i>
+            </div>
+          </div>
+
+          <!-- Body -->
+          <div class="card-body d-flex flex-column p-3">
+            <div class="seller-chip mb-2">
+              <i class="bi bi-shop" style="font-size:.7rem"></i>{{ product.sellerName }}
+            </div>
+            <h6 class="fw-700 mb-1"
+                style="font-size:.9375rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">
+              {{ product.name }}
+            </h6>
+            <p class="text-muted small mb-3 flex-grow-1"
+               style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.5">
+              {{ product.description || 'No description available.' }}
+            </p>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="product-price">${{ product.price | number:'1.2-2' }}</span>
+              <span class="badge"
+                    [style.background]="product.quantity > 0 ? '#F0FDF4' : '#FEF2F2'"
+                    [style.color]="product.quantity > 0 ? '#166534' : '#991B1B'"
+                    style="border:1px solid currentColor;font-size:.75rem">
+                {{ product.quantity > 0 ? product.quantity + ' left' : 'Sold out' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="card-footer bg-transparent p-3" style="border-top:1px solid #F3F4F6">
+            <button class="btn btn-primary w-100 btn-sm py-2">
+              <i class="bi bi-eye me-2"></i>View Details
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

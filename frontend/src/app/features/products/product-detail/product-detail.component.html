@@ -1,0 +1,118 @@
+<div class="container py-5" style="max-width:1000px">
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="row g-4">
+    <div class="col-md-6"><div class="skeleton" style="height:400px;border-radius:20px"></div></div>
+    <div class="col-md-6 d-flex flex-column gap-3">
+      <div class="skeleton" style="height:32px;width:70%"></div>
+      <div class="skeleton" style="height:48px;width:35%"></div>
+      <div class="skeleton" style="height:80px"></div>
+      <div class="skeleton" style="height:48px"></div>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert"
+       style="border-radius:12px;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B">
+    <i class="bi bi-exclamation-circle me-2"></i>{{ error }}
+  </div>
+
+  <div *ngIf="product && !loading" class="row g-5 fade-in-up">
+
+    <!-- Images -->
+    <div class="col-md-6">
+      <div *ngIf="product.imageUrls?.length > 0; else noImage">
+        <div style="border-radius:var(--radius-lg);overflow:hidden;height:420px;margin-bottom:.75rem;background:#F8F7FF;display:flex;align-items:center;justify-content:center">
+          <img [src]="product.imageUrls[activeImageIndex]" [alt]="product.name"
+               style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block">
+        </div>
+        <div *ngIf="product.imageUrls.length > 1" class="d-flex gap-2 flex-wrap">
+          <div *ngFor="let url of product.imageUrls; let i = index"
+               style="width:72px;height:72px;border-radius:var(--radius-sm);overflow:hidden;cursor:pointer;transition:all .2s"
+               [style.border]="i === activeImageIndex ? '2px solid var(--color-primary)' : '2px solid #E5E7EB'"
+               (click)="activeImageIndex = i">
+            <img [src]="url" [alt]="product.name" style="width:100%;height:100%;object-fit:cover">
+          </div>
+        </div>
+      </div>
+      <ng-template #noImage>
+        <div style="height:380px;border-radius:var(--radius-lg);background:linear-gradient(135deg,#EDE9FE,#E9D5FF);display:flex;align-items:center;justify-content:center;color:var(--color-primary);font-size:4rem">
+          <i class="bi bi-image"></i>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Details -->
+    <div class="col-md-6">
+      <div class="seller-chip mb-3">
+        <i class="bi bi-shop" style="font-size:.75rem"></i>
+        Sold by <strong>{{ product.sellerName }}</strong>
+      </div>
+
+      <h1 style="font-size:1.875rem;font-weight:800;letter-spacing:-.03em;line-height:1.2;margin-bottom:1rem">
+        {{ product.name }}
+      </h1>
+
+      <div class="product-price mb-3" style="font-size:2rem">${{ product.price | number:'1.2-2' }}</div>
+
+      <div class="mb-4">
+        <span class="badge"
+              [style.background]="product.quantity > 10 ? '#F0FDF4' : product.quantity > 0 ? '#FFFBEB' : '#FEF2F2'"
+              [style.color]="product.quantity > 10 ? '#166534' : product.quantity > 0 ? '#92400E' : '#991B1B'"
+              style="border:1px solid currentColor;font-size:.85rem;padding:.4rem .85rem">
+          <i class="bi me-1"
+             [class.bi-check-circle-fill]="product.quantity > 10"
+             [class.bi-exclamation-triangle-fill]="product.quantity <= 10 && product.quantity > 0"
+             [class.bi-x-circle-fill]="product.quantity === 0"></i>
+          {{ product.quantity > 10 ? 'In Stock' : product.quantity > 0 ? 'Only ' + product.quantity + ' left!' : 'Out of Stock' }}
+        </span>
+      </div>
+
+      <div class="mb-4">
+        <h6 class="fw-700 mb-2"
+            style="font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--color-muted)">
+          About this product
+        </h6>
+        <div style="position:relative">
+          <p [style.max-height]="showFullDescription ? 'none' : '4.8em'"
+             style="line-height:1.7;color:var(--color-text-light);overflow:hidden;margin-bottom:.25rem;transition:max-height .3s ease">
+            {{ product.description || 'No description provided.' }}
+          </p>
+          <button *ngIf="product.description && product.description.length > 200"
+                  (click)="showFullDescription = !showFullDescription"
+                  style="background:none;border:none;padding:0;color:var(--color-primary);font-weight:600;font-size:.875rem;cursor:pointer">
+            {{ showFullDescription ? 'Show less' : 'Read more' }}
+            <i class="bi ms-1" [class.bi-chevron-down]="!showFullDescription" [class.bi-chevron-up]="showFullDescription"></i>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="product.quantity > 0">
+        <!-- Not logged in -->
+        <a *ngIf="!authService.isLoggedIn()" routerLink="/login"
+           class="btn btn-primary w-100 py-3 mb-2" style="font-size:1rem">
+          <i class="bi bi-person me-2"></i>Sign in to Add to Cart
+        </a>
+        <!-- Logged in as CLIENT -->
+        <button *ngIf="authService.isClient()" class="btn btn-primary w-100 py-3 mb-2"
+                style="font-size:1rem" (click)="addToCart()">
+          <i class="bi bi-cart-plus me-2"></i>Add to Cart
+        </button>
+        <!-- Logged in as SELLER (can't buy) -->
+        <div *ngIf="authService.isSeller()"
+             class="alert mb-0" style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:var(--radius-md);color:#92400E">
+          <i class="bi bi-info-circle me-2"></i>Seller accounts cannot purchase products.
+        </div>
+      </div>
+      <div *ngIf="product.quantity === 0">
+        <div class="alert mb-0"
+             style="background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--radius-md);color:#991B1B">
+          <i class="bi bi-exclamation-circle me-2"></i>This product is currently out of stock.
+        </div>
+      </div>
+
+      <p class="text-muted small mt-3 mb-0">
+        <i class="bi bi-calendar3 me-1"></i>Listed {{ product.createdAt | date:'MMMM d, yyyy' }}
+      </p>
+    </div>
+  </div>
+</div>

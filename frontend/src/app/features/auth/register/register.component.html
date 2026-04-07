@@ -1,0 +1,177 @@
+<div class="auth-page">
+
+  <!-- Illustration side -->
+  <div class="auth-illustration">
+    <div style="position:relative;z-index:1;text-align:center">
+      <div style="font-size:4rem;margin-bottom:1rem">🚀</div>
+      <h2 style="font-size:2rem;font-weight:800;color:#fff;letter-spacing:-.03em;margin-bottom:.75rem">
+        Join Mer<span style="color:#F59E0B">cato</span> today
+      </h2>
+      <p style="color:rgba(255,255,255,.65);max-width:300px;margin:0 auto;line-height:1.6">
+        Whether you're here to shop or to sell — we've got you covered.
+      </p>
+
+      <div class="mt-4 d-flex flex-column gap-3" style="max-width:300px;margin:0 auto">
+        <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:.875rem 1.25rem;display:flex;align-items:center;gap:.875rem;text-align:left">
+          <div style="width:36px;height:36px;background:rgba(16,185,129,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <i class="bi bi-shield-check text-success"></i>
+          </div>
+          <div>
+            <div style="color:#fff;font-weight:600;font-size:.875rem">100% Secure</div>
+            <div style="color:rgba(255,255,255,.55);font-size:.78rem">Your data is always protected</div>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:.875rem 1.25rem;display:flex;align-items:center;gap:.875rem;text-align:left">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <i class="bi bi-lightning text-warning"></i>
+          </div>
+          <div>
+            <div style="color:#fff;font-weight:600;font-size:.875rem">Get Started Fast</div>
+            <div style="color:rgba(255,255,255,.55);font-size:.78rem">List your first product in minutes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form side -->
+  <div class="auth-form-side">
+    <div class="auth-card fade-in-up" style="max-width:480px">
+
+      <div class="mb-4">
+        <a routerLink="/" class="d-inline-flex align-items-center gap-2 text-muted mb-4 small">
+          <i class="bi bi-arrow-left"></i> Back to marketplace
+        </a>
+        <h2 class="fw-800 mb-1" style="font-size:1.75rem;letter-spacing:-.03em">Create account</h2>
+        <p class="text-muted mb-0">Fill in the details to get started</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- Role Selection -->
+        <div class="mb-4">
+          <label class="form-label">I want to...</label>
+          <div class="d-flex gap-3">
+            <div class="flex-fill">
+              <input type="radio" class="btn-check" id="roleClient" value="CLIENT" formControlName="role">
+              <label class="btn w-100 py-3 d-flex flex-column align-items-center gap-1"
+                     for="roleClient"
+                     style="border:1.5px solid #E5E7EB;border-radius:12px;transition:all .2s;cursor:pointer"
+                     [style.border-color]="role.value === 'CLIENT' ? 'var(--color-primary)' : '#E5E7EB'"
+                     [style.background]="role.value === 'CLIENT' ? 'var(--color-primary-light)' : '#fff'">
+                <i class="bi bi-cart-check fs-3"
+                   [style.color]="role.value === 'CLIENT' ? 'var(--color-primary)' : '#9CA3AF'"></i>
+                <strong [style.color]="role.value === 'CLIENT' ? 'var(--color-primary)' : '#374151'" style="font-size:.875rem">Buy</strong>
+                <span class="text-muted" style="font-size:.75rem">Browse & shop</span>
+              </label>
+            </div>
+            <div class="flex-fill">
+              <input type="radio" class="btn-check" id="roleSeller" value="SELLER" formControlName="role">
+              <label class="btn w-100 py-3 d-flex flex-column align-items-center gap-1"
+                     for="roleSeller"
+                     style="border:1.5px solid #E5E7EB;border-radius:12px;transition:all .2s;cursor:pointer"
+                     [style.border-color]="role.value === 'SELLER' ? '#10B981' : '#E5E7EB'"
+                     [style.background]="role.value === 'SELLER' ? '#F0FDF4' : '#fff'">
+                <i class="bi bi-shop fs-3"
+                   [style.color]="role.value === 'SELLER' ? '#10B981' : '#9CA3AF'"></i>
+                <strong [style.color]="role.value === 'SELLER' ? '#059669' : '#374151'" style="font-size:.875rem">Sell</strong>
+                <span class="text-muted" style="font-size:.75rem">List & manage</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Username -->
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-at"></i></span>
+            <input type="text" class="form-control" formControlName="username" placeholder="johndoe"
+                   [class.is-invalid]="username.invalid && username.touched"
+                   [class.is-valid]="username.valid && username.touched">
+            <div class="invalid-feedback">
+              <span *ngIf="username.errors?.['required']">Username is required.</span>
+              <span *ngIf="username.errors?.['minlength']">Must be at least 3 characters.</span>
+              <span *ngIf="username.errors?.['maxlength']">Cannot exceed 50 characters.</span>
+              <span *ngIf="username.errors?.['pattern'] && !username.errors?.['minlength']">Letters only — no numbers or symbols.</span>
+            </div>
+          </div>
+          <div class="form-text">3–50 characters, letters only.</div>
+        </div>
+
+        <!-- Email -->
+        <div class="mb-3">
+          <label class="form-label">Email address</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+            <input type="email" class="form-control" formControlName="email" placeholder="you@example.com"
+                   [class.is-invalid]="email.invalid && email.touched"
+                   [class.is-valid]="email.valid && email.touched">
+            <div class="invalid-feedback">
+              <span *ngIf="email.errors?.['required']">Email is required.</span>
+              <span *ngIf="email.errors?.['email']">Enter a valid email address (e.g. you&#64;example.com).</span>
+              <span *ngIf="email.errors?.['maxlength']">Email cannot exceed 50 characters.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input [type]="showPassword ? 'text' : 'password'"
+                   class="form-control" formControlName="password"
+                   placeholder="Create a strong password"
+                   [class.is-invalid]="password.invalid && password.touched">
+            <button type="button" class="btn btn-outline-secondary"
+                    style="border-left:none" (click)="showPassword = !showPassword">
+              <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </button>
+            <div class="invalid-feedback">
+              <span *ngIf="password.errors?.['required']">Password is required.</span>
+              <span *ngIf="password.errors?.['maxlength']">Cannot exceed 50 characters.</span>
+              <span *ngIf="password.errors?.['pattern'] || password.errors?.['minlength']">
+                Password does not meet requirements below.
+              </span>
+            </div>
+          </div>
+
+          <!-- Live password requirements -->
+          <div class="mt-2 p-3 rounded-3" style="background:#F9FAFB;border:1px solid #E5E7EB;font-size:.8rem">
+            <div class="fw-600 text-muted mb-2" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.04em">Password requirements</div>
+            <div class="d-flex flex-wrap gap-2">
+              <span [class]="pwHasMin ? 'badge bg-success' : 'badge bg-light text-muted border'">
+                <i [class]="pwHasMin ? 'bi bi-check-circle-fill me-1' : 'bi bi-circle me-1'"></i>6+ characters
+              </span>
+              <span [class]="pwHasUpper ? 'badge bg-success' : 'badge bg-light text-muted border'">
+                <i [class]="pwHasUpper ? 'bi bi-check-circle-fill me-1' : 'bi bi-circle me-1'"></i>Uppercase (A-Z)
+              </span>
+              <span [class]="pwHasLower ? 'badge bg-success' : 'badge bg-light text-muted border'">
+                <i [class]="pwHasLower ? 'bi bi-check-circle-fill me-1' : 'bi bi-circle me-1'"></i>Lowercase (a-z)
+              </span>
+              <span [class]="pwHasDigit ? 'badge bg-success' : 'badge bg-light text-muted border'">
+                <i [class]="pwHasDigit ? 'bi bi-check-circle-fill me-1' : 'bi bi-circle me-1'"></i>Number (0-9)
+              </span>
+              <span [class]="pwHasSpecial ? 'badge bg-success' : 'badge bg-light text-muted border'">
+                <i [class]="pwHasSpecial ? 'bi bi-check-circle-fill me-1' : 'bi bi-circle me-1'"></i>Symbol (!&#64;#$...)
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn btn-primary w-100 py-2 mb-3 mt-2" [disabled]="loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!loading" class="bi bi-person-plus me-2"></i>
+          {{ loading ? 'Creating account...' : 'Create Account' }}
+        </button>
+
+        <p class="text-center text-muted mb-0 small">
+          Already have an account?
+          <a routerLink="/login" class="text-purple fw-600">Sign in</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
