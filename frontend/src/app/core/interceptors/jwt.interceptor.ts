@@ -18,6 +18,8 @@ export class JwtInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const token = this.authService.getToken();
+    const isAuthRequest =
+      request.url.includes('/api/auth/login') || request.url.includes('/api/auth/register');
 
     if (token) {
       request = request.clone({
@@ -27,7 +29,7 @@ export class JwtInterceptor implements HttpInterceptor {
 
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
+        if (error.status === 401 && token && !isAuthRequest) {
           this.authService.logout();
           this.toastr.error('Session expired. Please log in again.', 'Unauthorized');
         } else if (error.status === 403) {
