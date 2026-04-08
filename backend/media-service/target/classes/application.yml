@@ -1,19 +1,24 @@
 server:
-  port: 8082
+  port: 8083
 
 spring:
   application:
-    name: product-service
+    name: media-service
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/productdb}
+      uri: ${MONGODB_URI:mongodb://localhost:27017/mediadb}
   kafka:
     bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
     consumer:
-      group-id: product-service
+      group-id: media-service
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 2MB
+      max-request-size: 2MB
 
 eureka:
   client:
@@ -27,11 +32,11 @@ eureka:
 jwt:
   secret: ${JWT_SECRET:dGhpcyBpcyBhIHZlcnkgc2VjdXJlIHNlY3JldCBrZXkgZm9yIGp3dCB0b2tlbiBzaWduaW5nIQ==}
 
-app:
-  seed:
-    enabled: ${APP_SEED_ENABLED:false}
-    force: ${APP_SEED_FORCE:false}
-    products-resource: ${APP_SEED_PRODUCTS_RESOURCE:seed/products.json}
+minio:
+  endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  secret-key: ${MINIO_SECRET_KEY:minioadmin}
+  bucket: ${MINIO_BUCKET:buy01-media}
 
 management:
   endpoints:

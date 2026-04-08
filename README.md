@@ -7,11 +7,13 @@ Buy-01 is a full-featured online marketplace where **sellers** can list products
 ## What Can You Do?
 
 ### As a Buyer (Client)
+
 - Browse all available products on the marketplace
 - View product details, images, price, and stock
 - Create an account and manage your profile
 
 ### As a Seller
+
 - Register as a seller and set up your storefront
 - Create, edit, and delete your product listings
 - Upload product images (JPEG, PNG, GIF, WebP, SVG — up to 2 MB each)
@@ -24,19 +26,22 @@ Buy-01 is a full-featured online marketplace where **sellers** can list products
 ## How to Run
 
 ### You need
+
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
 
 ### Steps
 
 **1. Clone the project**
+
 ```bash
 git clone <repo-url>
 cd buy-01
 ```
 
 **2. Start everything with one command**
+
 ```bash
-docker compose up --build
+docker compose up --build -d
 ```
 
 > The first time takes about 5–10 minutes while everything downloads and builds.
@@ -62,16 +67,16 @@ That's it!
 
 ## Pages
 
-| Page | URL | Who can access |
-|------|-----|----------------|
-| Product Listing | https://localhost | Everyone |
-| Sign In | https://localhost/login | Everyone |
-| Sign Up | https://localhost/register | Everyone |
-| Seller Dashboard | https://localhost/seller/dashboard | Sellers |
-| My Products | https://localhost/seller/products | Sellers |
-| Add Product | https://localhost/seller/products/new | Sellers |
-| Media Manager | https://localhost/seller/media | Sellers |
-| My Profile | https://localhost/profile | Logged-in users |
+| Page             | URL                                   | Who can access  |
+| ---------------- | ------------------------------------- | --------------- |
+| Product Listing  | https://localhost                     | Everyone        |
+| Sign In          | https://localhost/login               | Everyone        |
+| Sign Up          | https://localhost/register            | Everyone        |
+| Seller Dashboard | https://localhost/seller/dashboard    | Sellers         |
+| My Products      | https://localhost/seller/products     | Sellers         |
+| Add Product      | https://localhost/seller/products/new | Sellers         |
+| Media Manager    | https://localhost/seller/media        | Sellers         |
+| My Profile       | https://localhost/profile             | Logged-in users |
 
 ---
 
@@ -100,6 +105,7 @@ docker compose down
 ```
 
 To also remove all stored data (products, users, images):
+
 ```bash
 docker compose down -v
 ```

@@ -152,6 +152,7 @@ services:
       EUREKA_URL: http://eureka-server:8761/eureka/
       JWT_SECRET: dGhpcyBpcyBhIHZlcnkgc2VjdXJlIHNlY3JldCBrZXkgZm9yIGp3dCB0b2tlbiBzaWduaW5nIQ==
       JWT_EXPIRATION: 86400000
+      APP_SEED_ENABLED: "true"
     networks:
       - buy01-net
 
@@ -175,6 +176,7 @@ services:
       KAFKA_SERVERS: kafka:9092
       EUREKA_URL: http://eureka-server:8761/eureka/
       JWT_SECRET: dGhpcyBpcyBhIHZlcnkgc2VjdXJlIHNlY3JldCBrZXkgZm9yIGp3dCB0b2tlbiBzaWduaW5nIQ==
+      APP_SEED_ENABLED: "true"
     networks:
       - buy01-net
 

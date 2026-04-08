@@ -1,0 +1,18 @@
+[
+  {
+    "id": "user-ali-maki",
+    "username": "Ali",
+    "email": "Ali@gmail.com",
+    "password": "Ali123!!",
+    "role": "CLIENT",
+    "avatarUrl": "/assets/Ali Maki.jpeg"
+  },
+  {
+    "id": "user-habib",
+    "username": "Habib",
+    "email": "Habib@gmail.com",
+    "password": "Ali123!!",
+    "role": "SELLER",
+    "avatarUrl": "/assets/Habib.jpeg"
+  }
+]
