@@ -98,7 +98,7 @@ buy-01/
 
 ---
 
-## Stopping the App
+## Stopping The App
 
 ```bash
 docker compose down
