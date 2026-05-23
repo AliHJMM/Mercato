@@ -45,7 +45,7 @@ public class OrderDto {
                                 .quantity(item.getQuantity())
                                 .subtotal(item.getSubtotal())
                                 .build())
-                        .collect(Collectors.toList()))
+                        .toList())
                 .total(order.getTotal())
                 .status(order.getStatus())
                 .createdAt(order.getCreatedAt())

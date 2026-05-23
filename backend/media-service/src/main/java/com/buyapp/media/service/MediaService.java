@@ -83,7 +83,7 @@ public class MediaService {
         return mediaRepository.findByUploadedBy(sellerId)
                 .stream()
                 .map(MediaDto::from)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public void deleteMedia(String id) {

@@ -82,7 +82,7 @@ public class OrderService {
         return orderRepository.findByBuyerIdOrderByCreatedAtDesc(buyerId)
                 .stream()
                 .map(OrderDto::from)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private String getCurrentUserId() {

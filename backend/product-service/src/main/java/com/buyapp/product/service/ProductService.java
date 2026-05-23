@@ -30,7 +30,7 @@ public class ProductService {
         return productRepository.findAll()
                 .stream()
                 .map(ProductDto::from)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public ProductDto getProductById(String id) {
@@ -42,7 +42,7 @@ public class ProductService {
         return productRepository.findBySellerId(sellerId)
                 .stream()
                 .map(ProductDto::from)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public ProductDto createProduct(ProductRequest request) {
