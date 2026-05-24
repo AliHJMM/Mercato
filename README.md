@@ -104,7 +104,7 @@ buy-01/
 docker compose down
 ```
 
-To also remove all stored data (products, users, images):
+To also remove all stored data ( products, users, images ):
 
 ```bash
 docker compose down -v
