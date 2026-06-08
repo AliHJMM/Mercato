@@ -9,6 +9,7 @@ import { OrderService } from '../../core/services/order.service';
 import { ToastrService } from 'ngx-toastr';
 import { Media } from '../../core/models/media.model';
 import { UserAnalytics } from '../../core/models/order.model';
+import { ChartConfiguration } from 'chart.js';
 
 @Component({
   selector: 'app-profile',
@@ -25,6 +26,9 @@ export class ProfileComponent implements OnInit {
 
   analytics: UserAnalytics | null = null;
   analyticsLoading = false;
+
+  mostBoughtChartConfig: ChartConfiguration | null = null;
+  categoriesChartConfig: ChartConfiguration | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -60,22 +64,73 @@ export class ProfileComponent implements OnInit {
   loadAnalytics(): void {
     this.analyticsLoading = true;
     this.orderService.getUserAnalytics().subscribe({
-      next: (a) => { this.analytics = a; this.analyticsLoading = false; },
+      next: (a) => {
+        this.analytics = a;
+        this.buildUserCharts(a);
+        this.analyticsLoading = false;
+      },
       error: () => { this.analyticsLoading = false; }
     });
   }
 
+  private buildUserCharts(a: UserAnalytics): void {
+    if (a.mostBoughtProducts?.length) {
+      this.mostBoughtChartConfig = {
+        type: 'bar',
+        data: {
+          labels: a.mostBoughtProducts.map(p => p.productName),
+          datasets: [{
+            label: 'Units Bought',
+            data: a.mostBoughtProducts.map(p => p.totalQuantity),
+            backgroundColor: [
+              'rgba(59,130,246,0.8)',
+              'rgba(139,92,246,0.8)',
+              'rgba(16,185,129,0.8)',
+              'rgba(245,158,11,0.8)',
+              'rgba(239,68,68,0.8)'
+            ],
+            borderWidth: 0,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(0,0,0,0.05)' } },
+            x: { grid: { display: false } }
+          }
+        }
+      };
+    }
+
+    if (a.topCategories?.length) {
+      this.categoriesChartConfig = {
+        type: 'doughnut',
+        data: {
+          labels: a.topCategories.map(c => c.category),
+          datasets: [{
+            data: a.topCategories.map(c => c.totalSpent),
+            backgroundColor: ['#7C3AED', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'],
+            borderWidth: 2,
+            borderColor: '#fff',
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+            tooltip: { callbacks: { label: (ctx) => ` $${Number(ctx.parsed).toFixed(2)}` } }
+          }
+        }
+      };
+    }
+  }
+
   get username() { return this.form.get('username')!; }
-
-  maxSpent(): number {
-    if (!this.analytics?.mostBoughtProducts?.length) return 1;
-    return Math.max(...this.analytics.mostBoughtProducts.map(p => p.totalSpent));
-  }
-
-  maxCategorySpent(): number {
-    if (!this.analytics?.topCategories?.length) return 1;
-    return Math.max(...this.analytics.topCategories.map(c => c.totalSpent));
-  }
 
   onAvatarSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
