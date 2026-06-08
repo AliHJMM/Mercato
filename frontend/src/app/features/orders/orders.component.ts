@@ -13,6 +13,7 @@ export class OrdersComponent implements OnInit {
   filteredOrders: Order[] = [];
   loading = true;
   error = '';
+  searchTerm = '';
   selectedStatus = '';
   actionLoading: { [orderId: string]: boolean } = {};
 
@@ -31,11 +32,10 @@ export class OrdersComponent implements OnInit {
   loadOrders(): void {
     this.loading = true;
     this.error = '';
-    const status = this.selectedStatus || undefined;
-    this.orderService.getMyOrders(status).subscribe({
+    this.orderService.getMyOrders().subscribe({
       next: (orders) => {
         this.orders = orders;
-        this.filteredOrders = [...orders];
+        this.applyFilters();
         this.loading = false;
       },
       error: () => {
@@ -45,8 +45,19 @@ export class OrdersComponent implements OnInit {
     });
   }
 
-  onStatusChange(): void {
-    this.loadOrders();
+  applyFilters(): void {
+    let result = this.orders;
+    if (this.selectedStatus) {
+      result = result.filter(o => o.status === this.selectedStatus);
+    }
+    if (this.searchTerm.trim()) {
+      const q = this.searchTerm.toLowerCase();
+      result = result.filter(o =>
+        o.id.toLowerCase().includes(q) ||
+        o.items.some(i => i.productName.toLowerCase().includes(q))
+      );
+    }
+    this.filteredOrders = result;
   }
 
   viewDetail(id: string): void {
@@ -75,7 +86,7 @@ export class OrdersComponent implements OnInit {
     this.orderService.deleteOrder(order.id).subscribe({
       next: () => {
         this.orders = this.orders.filter(o => o.id !== order.id);
-        this.filteredOrders = this.filteredOrders.filter(o => o.id !== order.id);
+        this.applyFilters();
         this.toastr.success('Order deleted.', 'Done');
       },
       error: (err) => {
@@ -125,7 +136,6 @@ export class OrdersComponent implements OnInit {
   private replaceOrder(updated: Order): void {
     const idx = this.orders.findIndex(o => o.id === updated.id);
     if (idx !== -1) this.orders[idx] = updated;
-    const idx2 = this.filteredOrders.findIndex(o => o.id === updated.id);
-    if (idx2 !== -1) this.filteredOrders[idx2] = updated;
+    this.applyFilters();
   }
 }
