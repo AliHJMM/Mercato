@@ -154,20 +154,14 @@ pipeline {
                 stage('Test: Frontend (Karma/Jasmine)') {
                     steps {
                         catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
-                            dir("${MERCATO_DIR}/frontend") {
-                                sh '''
-                                docker run --rm \
-                                    -v "$(pwd)":/app \
-                                    -w /app \
-                                    --shm-size=2g \
-                                    node:20-alpine \
-                                    sh -c "
-                                     apk add --no-cache chromium chromium-chromedriver &&
-                                        npm install --quiet &&
-                                        npm run test -- --watch=false --browsers=ChromeHeadless --no-progress
-                                    "
-'''
-                            }
+                            sh """
+                                docker run --rm \\
+                                    -v "\${WORKSPACE}/${MERCATO_DIR}/frontend":/app \\
+                                    -w /app \\
+                                    --shm-size=2g \\
+                                    node:20-alpine \\
+                                    sh -c 'apk add --no-cache chromium chromium-chromedriver && npm install --quiet && npm run test -- --watch=false --browsers=ChromeHeadless --no-progress'
+                            """
                         }
                     }
                     post {
