@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { CartService } from '../../../core/services/cart.service';
+import { WishlistService } from '../../../core/services/wishlist.service';
 import { Router } from '@angular/router';
 import { User } from '../../../core/models/user.model';
 import { Observable } from 'rxjs';
@@ -15,6 +16,7 @@ export class NavbarComponent {
   constructor(
     private authService: AuthService,
     public cartService: CartService,
+    public wishlistService: WishlistService,
     private router: Router
   ) {
     this.currentUser$ = this.authService.currentUser$;

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Product, ProductRequest } from '../models/product.model';
+import { Product, ProductRequest, ProductSearchResponse } from '../models/product.model';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
@@ -19,6 +19,30 @@ export class ProductService {
 
   getMyProducts(): Observable<Product[]> {
     return this.http.get<Product[]>(`${this.apiUrl}/my`);
+  }
+
+  search(params: {
+    q?: string;
+    category?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    sort?: string;
+    page?: number;
+    size?: number;
+  }): Observable<ProductSearchResponse> {
+    let httpParams = new HttpParams();
+    if (params.q) httpParams = httpParams.set('q', params.q);
+    if (params.category) httpParams = httpParams.set('category', params.category);
+    if (params.minPrice != null) httpParams = httpParams.set('minPrice', params.minPrice.toString());
+    if (params.maxPrice != null) httpParams = httpParams.set('maxPrice', params.maxPrice.toString());
+    if (params.sort) httpParams = httpParams.set('sort', params.sort);
+    if (params.page != null) httpParams = httpParams.set('page', params.page.toString());
+    if (params.size != null) httpParams = httpParams.set('size', params.size.toString());
+    return this.http.get<ProductSearchResponse>(`${this.apiUrl}/search`, { params: httpParams });
+  }
+
+  getCategories(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/categories`);
   }
 
   create(request: ProductRequest): Observable<Product> {

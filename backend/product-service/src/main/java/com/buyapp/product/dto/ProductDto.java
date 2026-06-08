@@ -21,6 +21,7 @@ public class ProductDto {
     private Integer quantity;
     private String sellerId;
     private String sellerName;
+    private String category;
     private List<String> imageUrls;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -34,6 +35,7 @@ public class ProductDto {
                 .quantity(product.getQuantity())
                 .sellerId(product.getSellerId())
                 .sellerName(product.getSellerName())
+                .category(product.getCategory())
                 .imageUrls(product.getImageUrls())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())

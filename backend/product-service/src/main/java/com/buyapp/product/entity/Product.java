@@ -32,6 +32,8 @@ public class Product {
 
     private String sellerName;
 
+    private String category;
+
     @Builder.Default
     private List<String> imageUrls = new ArrayList<>();
 

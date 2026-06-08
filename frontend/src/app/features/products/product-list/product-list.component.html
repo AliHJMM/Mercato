@@ -107,8 +107,11 @@
               <i class="bi bi-image"></i>
             </div>
             <span class="product-card-badge" *ngIf="isNew(product)">NEW</span>
-            <div class="product-card-wishlist">
-              <i class="bi bi-eye-fill text-purple"></i>
+            <div *ngIf="authService.isClient()" class="product-card-wishlist" (click)="toggleWishlist(product, $event)" style="cursor:pointer">
+              <i class="bi text-purple"
+                 [class.bi-heart-fill]="wishlistService.isWishlisted(product.id)"
+                 [class.bi-heart]="!wishlistService.isWishlisted(product.id)"
+                 [style.color]="wishlistService.isWishlisted(product.id) ? '#EC4899' : ''"></i>
             </div>
           </div>
 

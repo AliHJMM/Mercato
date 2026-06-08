@@ -23,5 +23,7 @@ public class ProductRequest {
     @PositiveOrZero(message = "Quantity cannot be negative")
     private Integer quantity;
 
+    private String category;
+
     private List<String> imageUrls = new ArrayList<>();
 }

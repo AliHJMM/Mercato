@@ -6,13 +6,15 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { ProductManagementComponent } from './product-management/product-management.component';
 import { ProductFormComponent } from './product-form/product-form.component';
 import { MediaManagerComponent } from './media-manager/media-manager.component';
+import { SellerOrdersComponent } from './seller-orders/seller-orders.component';
 
 const routes: Routes = [
   { path: 'dashboard', component: DashboardComponent },
   { path: 'products', component: ProductManagementComponent },
   { path: 'products/new', component: ProductFormComponent },
   { path: 'products/:id/edit', component: ProductFormComponent },
-  { path: 'media', component: MediaManagerComponent }
+  { path: 'media', component: MediaManagerComponent },
+  { path: 'orders', component: SellerOrdersComponent }
 ];
 
 @NgModule({
@@ -20,7 +22,8 @@ const routes: Routes = [
     DashboardComponent,
     ProductManagementComponent,
     ProductFormComponent,
-    MediaManagerComponent
+    MediaManagerComponent,
+    SellerOrdersComponent
   ],
   imports: [
     CommonModule,

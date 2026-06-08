@@ -1,0 +1,153 @@
+<!-- Header -->
+<div style="background:linear-gradient(135deg,#1A1A2E,#7C3AED);padding:2.5rem 0 5rem">
+  <div class="container">
+    <button class="btn btn-link p-0 mb-2" style="color:rgba(255,255,255,.7)" routerLink="/orders">
+      <i class="bi bi-arrow-left me-1"></i>Back to Orders
+    </button>
+    <h1 style="color:#fff;font-size:1.75rem;font-weight:800;margin-bottom:.25rem">Order Details</h1>
+    <p *ngIf="order" style="color:rgba(255,255,255,.6);margin:0;font-size:.9rem">
+      #{{ order.id.slice(-8).toUpperCase() }} · {{ order.createdAt | date:'MMM d, yyyy · h:mm a' }}
+    </p>
+  </div>
+</div>
+
+<div class="container" style="max-width:760px;margin-top:-3rem;padding-bottom:3rem">
+
+  <div *ngIf="loading" class="card p-5 text-center fade-in-up">
+    <div class="spinner-border text-purple mx-auto mb-3"></div>
+    <div class="text-muted">Loading order...</div>
+  </div>
+
+  <div *ngIf="error" class="alert" style="border-radius:12px;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B">
+    <i class="bi bi-exclamation-circle me-2"></i>{{ error }}
+  </div>
+
+  <ng-container *ngIf="!loading && order">
+
+    <!-- Status + Actions -->
+    <div class="card p-4 mb-3 fade-in-up">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+          <div class="text-muted small mb-1">Status</div>
+          <span class="badge rounded-pill fs-6 px-3 py-2"
+                [style.background]="getStatusColor(order.status) + '20'"
+                [style.color]="getStatusColor(order.status)"
+                style="border:1px solid currentColor">
+            {{ order.status }}
+          </span>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <button *ngIf="canCancel()" class="btn btn-sm btn-outline-warning" (click)="cancel()" [disabled]="actionLoading">
+            <span *ngIf="actionLoading" class="spinner-border spinner-border-sm me-1"></span>
+            <i *ngIf="!actionLoading" class="bi bi-x-circle me-1"></i>Cancel
+          </button>
+          <button *ngIf="canDelete()" class="btn btn-sm btn-outline-danger" (click)="remove()" [disabled]="actionLoading">
+            <i class="bi bi-trash me-1"></i>Remove
+          </button>
+          <button *ngIf="canRedo()" class="btn btn-sm btn-success" (click)="redo()" [disabled]="actionLoading">
+            <span *ngIf="actionLoading" class="spinner-border spinner-border-sm me-1"></span>
+            <i *ngIf="!actionLoading" class="bi bi-arrow-repeat me-1"></i>Re-order
+          </button>
+        </div>
+      </div>
+
+      <!-- Status Timeline -->
+      <ng-container *ngIf="order.status !== 'CANCELLED'">
+        <div class="d-flex align-items-center justify-content-between" style="position:relative;padding:0 8px">
+          <div style="position:absolute;left:8px;right:8px;top:50%;height:2px;background:#E5E7EB;z-index:0;transform:translateY(-50%)"></div>
+          <ng-container *ngFor="let s of timeline; let i = index">
+            <div class="d-flex flex-column align-items-center" style="position:relative;z-index:1">
+              <div [style.background]="timelineStep >= i ? getStatusColor(s) : '#E5E7EB'"
+                   [style.color]="timelineStep >= i ? '#fff' : '#9CA3AF'"
+                   style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;border:3px solid #fff">
+                <i class="bi" [ngClass]="{
+                  'bi-bag': s==='PLACED',
+                  'bi-check': s==='CONFIRMED',
+                  'bi-truck': s==='SHIPPED',
+                  'bi-house-check': s==='DELIVERED'
+                }"></i>
+              </div>
+              <div class="mt-1 text-center" style="font-size:.7rem;font-weight:600"
+                   [style.color]="timelineStep >= i ? getStatusColor(s) : '#9CA3AF'">
+                {{ s }}
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </ng-container>
+
+      <div *ngIf="order.status === 'CANCELLED'" class="text-center py-2">
+        <i class="bi bi-x-circle text-danger me-2"></i>
+        <span class="text-danger fw-600">Order cancelled</span>
+        <span *ngIf="order.cancelledAt" class="text-muted small ms-2">on {{ order.cancelledAt | date:'MMM d, yyyy' }}</span>
+      </div>
+    </div>
+
+    <!-- Delivery Address -->
+    <div class="card p-4 mb-3 fade-in-up" *ngIf="order.deliveryAddress">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <i class="bi bi-geo-alt text-primary"></i>
+        <h6 class="fw-700 mb-0">Delivery Address</h6>
+      </div>
+      <div class="text-muted small" style="line-height:1.7">
+        <strong class="text-dark">{{ order.deliveryAddress.fullName }}</strong><br>
+        {{ order.deliveryAddress.street }}<br>
+        {{ order.deliveryAddress.city }}, {{ order.deliveryAddress.state }} {{ order.deliveryAddress.zipCode }}<br>
+        {{ order.deliveryAddress.country }}<br>
+        <i class="bi bi-telephone me-1"></i>{{ order.deliveryAddress.phone }}
+      </div>
+    </div>
+
+    <!-- Order Items -->
+    <div class="card p-4 mb-3 fade-in-up">
+      <h6 class="fw-700 mb-3"><i class="bi bi-bag me-2"></i>Items ({{ order.items.length }})</h6>
+      <div *ngFor="let item of order.items; let last = last"
+           class="d-flex gap-3 align-items-center py-3"
+           [style.border-bottom]="!last ? '1px solid #F3F4F6' : 'none'">
+        <div style="width:60px;height:60px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#F3F4F6;display:flex;align-items:center;justify-content:center">
+          <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="item.productName"
+               style="width:100%;height:100%;object-fit:cover" (error)="item.imageUrl = ''">
+          <i *ngIf="!item.imageUrl" class="bi bi-image" style="color:#D1D5DB;font-size:1.25rem"></i>
+        </div>
+        <div class="flex-grow-1 min-width-0">
+          <div class="fw-600">{{ item.productName }}</div>
+          <div class="text-muted small">by {{ item.sellerName }}</div>
+          <div *ngIf="item.category" class="badge mt-1" style="background:#F3F4F6;color:#374151;font-size:.72rem">{{ item.category }}</div>
+        </div>
+        <div class="text-end flex-shrink-0">
+          <div class="fw-700" style="color:var(--color-primary)">${{ item.subtotal | number:'1.2-2' }}</div>
+          <div class="text-muted small">{{ item.quantity }} × ${{ item.price | number:'1.2-2' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Totals -->
+    <div class="card p-4 fade-in-up">
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted">Subtotal</span>
+        <span class="fw-600">${{ order.total | number:'1.2-2' }}</span>
+      </div>
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted">Delivery</span>
+        <span class="fw-600 text-success">Free</span>
+      </div>
+      <div class="d-flex justify-content-between" style="border-top:2px solid #E5E7EB;padding-top:.75rem;margin-top:.5rem">
+        <span class="fw-800 fs-5">Total</span>
+        <span class="fw-800 fs-5" style="color:var(--color-primary)">${{ order.total | number:'1.2-2' }}</span>
+      </div>
+      <div class="mt-3 text-muted small">
+        <i class="bi me-1" [ngClass]="{
+          'bi-cash-coin':    !order.paymentMethod || order.paymentMethod === 'PAY_ON_DELIVERY',
+          'bi-credit-card':  order.paymentMethod === 'CREDIT_CARD',
+          'bi-paypal':       order.paymentMethod === 'PAYPAL'
+        }"></i>
+        Payment: {{
+          order.paymentMethod === 'CREDIT_CARD' ? 'Credit Card' :
+          order.paymentMethod === 'PAYPAL'       ? 'PayPal' :
+          'Pay on Delivery'
+        }}
+      </div>
+    </div>
+
+  </ng-container>
+</div>

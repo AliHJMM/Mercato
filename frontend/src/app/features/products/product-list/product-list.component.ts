@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProductService } from '../../../core/services/product.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { WishlistService } from '../../../core/services/wishlist.service';
+import { ToastrService } from 'ngx-toastr';
 import { Product } from '../../../core/models/product.model';
 
 @Component({
@@ -16,8 +18,22 @@ export class ProductListComponent implements OnInit {
   constructor(
     private productService: ProductService,
     public authService: AuthService,
+    public wishlistService: WishlistService,
+    private toastr: ToastrService,
     private router: Router
   ) {}
+
+  toggleWishlist(product: Product, event: Event): void {
+    event.stopPropagation();
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login']); return;
+    }
+    this.wishlistService.toggle(product);
+    const msg = this.wishlistService.isWishlisted(product.id)
+      ? `${product.name} added to wishlist!`
+      : `${product.name} removed from wishlist.`;
+    this.toastr.info(msg, 'Wishlist');
+  }
 
   ngOnInit(): void {
     this.productService.getAll().subscribe({

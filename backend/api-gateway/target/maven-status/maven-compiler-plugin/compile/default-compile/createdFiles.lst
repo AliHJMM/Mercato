@@ -1,5 +1,0 @@
-com\buyapp\gateway\ApiGatewayApplication.class
-com\buyapp\gateway\filter\RateLimitingFilter.class
-com\buyapp\gateway\filter\AuthenticationFilter.class
-com\buyapp\gateway\util\JwtUtil.class
-com\buyapp\gateway\config\CorsConfig.class

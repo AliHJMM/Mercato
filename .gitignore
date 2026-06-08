@@ -1,0 +1,21 @@
+# ─── Frontend ────────────────────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+frontend/test-results/
+
+# ─── Backend (Maven) ─────────────────────────────────────────────────────────
+backend/**/target/
+backend/**/*.class
+
+# ─── ngrok ───────────────────────────────────────────────────────────────────
+ngrok.exe
+ngrok.zip
+
+# ─── OS / IDE ─────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+.vscode/

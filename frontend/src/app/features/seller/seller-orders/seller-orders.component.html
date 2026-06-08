@@ -1,0 +1,82 @@
+<!-- Header -->
+<div style="background:linear-gradient(135deg,#1A1A2E,#F59E0B);padding:2.5rem 0 5rem">
+  <div class="container">
+    <h1 style="color:#fff;font-size:1.75rem;font-weight:800;margin-bottom:.25rem">
+      <i class="bi bi-bag-check me-2"></i>Orders for My Products
+    </h1>
+    <p style="color:rgba(255,255,255,.7);margin:0;font-size:.9rem">See all orders that include your products</p>
+  </div>
+</div>
+
+<div class="container" style="max-width:860px;margin-top:-3rem;padding-bottom:3rem">
+
+  <!-- Filter bar -->
+  <div class="card p-3 mb-3 fade-in-up">
+    <div class="row g-3">
+      <div class="col-md-7">
+        <input type="text" class="form-control form-control-sm" placeholder="Search by order ID or product name..."
+               [(ngModel)]="searchTerm" (input)="applyFilters()">
+      </div>
+      <div class="col-md-5">
+        <select class="form-select form-select-sm" [(ngModel)]="selectedStatus" (change)="applyFilters()">
+          <option value="">All Statuses</option>
+          <option *ngFor="let s of statuses.slice(1)" [value]="s">{{ s }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="card p-5 text-center fade-in-up">
+    <div class="spinner-border text-warning mx-auto mb-3"></div>
+    <div class="text-muted">Loading orders...</div>
+  </div>
+
+  <div *ngIf="error" class="alert" style="background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;border-radius:12px">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && filteredOrders.length === 0 && !error" class="card p-5 text-center fade-in-up">
+    <div style="font-size:3rem;color:#D1D5DB;margin-bottom:1rem"><i class="bi bi-inbox"></i></div>
+    <h5 class="fw-700">No orders found</h5>
+    <p class="text-muted">No customers have ordered your products yet.</p>
+  </div>
+
+  <div *ngIf="!loading && filteredOrders.length > 0" class="fade-in-up">
+    <div class="card mb-3" *ngFor="let order of filteredOrders">
+      <div class="p-3" style="border-bottom:1px solid #F3F4F6;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem">
+        <div>
+          <div class="fw-700 small text-muted">#{{ order.id.slice(-8).toUpperCase() }}</div>
+          <div class="text-muted small"><i class="bi bi-calendar3 me-1"></i>{{ order.createdAt | date:'MMM d, yyyy · h:mm a' }}</div>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <span class="fw-800 text-primary">${{ order.total | number:'1.2-2' }}</span>
+          <span class="badge rounded-pill"
+                [style.background]="getStatusColor(order.status) + '20'"
+                [style.color]="getStatusColor(order.status)"
+                style="border:1px solid currentColor">{{ order.status }}</span>
+          <button *ngIf="nextStatusLabel(order.status)"
+                  class="btn btn-sm"
+                  [style.background]="getStatusColor(order.status)"
+                  style="color:#fff;font-size:.75rem;padding:.25rem .75rem"
+                  [disabled]="advancingId === order.id"
+                  (click)="advanceStatus(order)">
+            <span *ngIf="advancingId === order.id" class="spinner-border spinner-border-sm me-1"></span>
+            <i *ngIf="advancingId !== order.id" class="bi me-1" [ngClass]="nextStatusIcon(order.status)"></i>
+            {{ nextStatusLabel(order.status) }}
+          </button>
+        </div>
+      </div>
+      <div class="p-3">
+        <div *ngFor="let item of order.items; let last = last"
+             class="d-flex gap-3 align-items-center py-2"
+             [style.border-bottom]="!last ? '1px solid #F9FAFB' : 'none'">
+          <div class="flex-grow-1">
+            <div class="fw-600 small">{{ item.productName }}</div>
+            <div class="text-muted" style="font-size:.78rem">Qty {{ item.quantity }}</div>
+          </div>
+          <div class="fw-700 small text-primary">${{ item.subtotal | number:'1.2-2' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

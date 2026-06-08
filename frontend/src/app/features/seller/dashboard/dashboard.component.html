@@ -7,7 +7,7 @@
           <i class="bi bi-speedometer2 me-2"></i>Seller Dashboard
         </p>
         <h1 style="color:#fff;font-size:1.75rem;font-weight:800;letter-spacing:-.03em;margin-bottom:.25rem">
-          Hello, {{ authService.currentUser?.username }}! 👋
+          Hello, {{ authService.currentUser?.username }}!
         </h1>
         <p style="color:rgba(255,255,255,.6);margin:0;font-size:.9rem">Here's what's happening with your store today.</p>
       </div>
@@ -20,7 +20,7 @@
 
 <div class="container" style="margin-top:-3rem;padding-bottom:3rem">
 
-  <!-- Loading -->
+  <!-- Loading skeletons -->
   <div *ngIf="loading" class="row g-4 mb-4">
     <div class="col-sm-6 col-lg-3" *ngFor="let i of [1,2,3,4]">
       <div class="card p-4">
@@ -57,19 +57,21 @@
         <div class="card stat-card fade-in-up" style="border-left:4px solid #F59E0B">
           <div class="stat-icon" style="background:#FFFBEB;color:#F59E0B"><i class="bi bi-cash-stack"></i></div>
           <div>
-            <div class="stat-value" style="color:#D97706">${{ totalValue | number:'1.0-0' }}</div>
-            <div class="stat-label">Inventory Value</div>
+            <div class="stat-value" style="color:#D97706">
+              ${{ analytics ? (analytics.totalRevenue | number:'1.2-2') : (totalValue | number:'1.0-0') }}
+            </div>
+            <div class="stat-label">{{ analytics ? 'Revenue Earned' : 'Inventory Value' }}</div>
           </div>
         </div>
       </div>
       <div class="col-sm-6 col-lg-3">
         <div class="card stat-card fade-in-up" style="border-left:4px solid #3B82F6">
-          <div class="stat-icon" style="background:#EFF6FF;color:#3B82F6"><i class="bi bi-graph-up"></i></div>
+          <div class="stat-icon" style="background:#EFF6FF;color:#3B82F6"><i class="bi bi-bag-check"></i></div>
           <div>
             <div class="stat-value" style="color:#3B82F6">
-              ${{ products.length > 0 ? (totalValue / products.length | number:'1.2-2') : '0.00' }}
+              {{ analytics ? analytics.totalOrdersProcessed : '—' }}
             </div>
-            <div class="stat-label">Avg. Price</div>
+            <div class="stat-label">Orders Processed</div>
           </div>
         </div>
       </div>
@@ -81,9 +83,7 @@
         <a routerLink="/seller/products/new"
            class="card p-3 d-flex flex-row align-items-center gap-3 text-decoration-none"
            style="border:1.5px solid #EDE9FE;transition:all .2s">
-          <div class="stat-icon" style="background:linear-gradient(135deg,#A78BFA,#7C3AED);color:#fff;width:44px;height:44px;flex-shrink:0">
-            <i class="bi bi-plus-square"></i>
-          </div>
+          <div class="stat-icon" style="background:linear-gradient(135deg,#A78BFA,#7C3AED);color:#fff;width:44px;height:44px;flex-shrink:0"><i class="bi bi-plus-square"></i></div>
           <div>
             <div class="fw-700 text-dark" style="font-size:.9rem">New Product</div>
             <div class="text-muted" style="font-size:.78rem">Create a new listing</div>
@@ -94,9 +94,7 @@
         <a routerLink="/seller/products"
            class="card p-3 d-flex flex-row align-items-center gap-3 text-decoration-none"
            style="border:1.5px solid #ECFDF5;transition:all .2s">
-          <div class="stat-icon" style="background:linear-gradient(135deg,#34D399,#10B981);color:#fff;width:44px;height:44px;flex-shrink:0">
-            <i class="bi bi-list-ul"></i>
-          </div>
+          <div class="stat-icon" style="background:linear-gradient(135deg,#34D399,#10B981);color:#fff;width:44px;height:44px;flex-shrink:0"><i class="bi bi-list-ul"></i></div>
           <div>
             <div class="fw-700 text-dark" style="font-size:.9rem">Manage Products</div>
             <div class="text-muted" style="font-size:.78rem">Edit or delete listings</div>
@@ -104,24 +102,49 @@
         </a>
       </div>
       <div class="col-md-4">
-        <a routerLink="/seller/media"
+        <a routerLink="/seller/orders"
            class="card p-3 d-flex flex-row align-items-center gap-3 text-decoration-none"
-           style="border:1.5px solid #EFF6FF;transition:all .2s">
-          <div class="stat-icon" style="background:linear-gradient(135deg,#60A5FA,#3B82F6);color:#fff;width:44px;height:44px;flex-shrink:0">
-            <i class="bi bi-cloud-upload"></i>
-          </div>
+           style="border:1.5px solid #FEF3C7;transition:all .2s">
+          <div class="stat-icon" style="background:linear-gradient(135deg,#FCD34D,#F59E0B);color:#fff;width:44px;height:44px;flex-shrink:0"><i class="bi bi-bag-check"></i></div>
           <div>
-            <div class="fw-700 text-dark" style="font-size:.9rem">Media Manager</div>
-            <div class="text-muted" style="font-size:.78rem">Upload & manage images</div>
+            <div class="fw-700 text-dark" style="font-size:.9rem">My Orders</div>
+            <div class="text-muted" style="font-size:.78rem">View orders for your products</div>
           </div>
         </a>
       </div>
     </div>
 
+    <!-- ─── Analytics ─── -->
+    <div class="row g-4 mb-4" *ngIf="analytics && analytics.bestSellingProducts?.length">
+      <div class="col-12">
+        <div class="card p-4">
+          <div class="d-flex align-items-center gap-2 mb-4">
+            <div style="width:32px;height:32px;background:#FFFBEB;border-radius:8px;display:flex;align-items:center;justify-content:center">
+              <i class="bi bi-graph-up" style="color:#F59E0B;font-size:.9rem"></i>
+            </div>
+            <h5 class="fw-800 mb-0">Best Selling Products</h5>
+            <span class="ms-auto badge" style="background:#FEF3C7;color:#92400E">
+              {{ analytics.totalUnitsSold }} units sold total
+            </span>
+          </div>
+
+          <div *ngFor="let p of analytics.bestSellingProducts" class="mb-4">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="fw-600 small">{{ p.productName }}</span>
+              <span class="text-muted small">{{ p.unitsSold }} units · ${{ p.revenue | number:'1.2-2' }}</span>
+            </div>
+            <div style="height:8px;background:#F3F4F6;border-radius:4px;overflow:hidden">
+              <div style="height:100%;background:linear-gradient(90deg,#F59E0B,#D97706);border-radius:4px;transition:width .4s"
+                   [style.width]="(p.revenue / maxRevenue() * 100) + '%'"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ─── Recent Products ─── -->
     <div class="card">
-      <div class="card-header bg-transparent d-flex justify-content-between align-items-center"
-           style="border-bottom:1px solid #F3F4F6;padding:1.25rem 1.5rem">
+      <div class="card-header bg-transparent d-flex justify-content-between align-items-center" style="border-bottom:1px solid #F3F4F6;padding:1.25rem 1.5rem">
         <div>
           <h5 class="fw-800 mb-0">Recent Products</h5>
           <p class="text-muted small mb-0">Your latest listings</p>
@@ -139,21 +162,14 @@
       <div class="table-responsive" *ngIf="products.length > 0">
         <table class="table mb-0">
           <thead>
-            <tr>
-              <th>Product</th>
-              <th>Price</th>
-              <th>Stock</th>
-              <th>Images</th>
-              <th></th>
-            </tr>
+            <tr><th>Product</th><th>Price</th><th>Stock</th><th>Category</th><th></th></tr>
           </thead>
           <tbody>
             <tr *ngFor="let p of recentProducts">
               <td>
                 <div class="d-flex align-items-center gap-3">
                   <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;background:#EDE9FE;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                    <img *ngIf="p.imageUrls?.length" [src]="p.imageUrls[0]" [alt]="p.name"
-                         style="width:100%;height:100%;object-fit:cover">
+                    <img *ngIf="p.imageUrls?.length" [src]="p.imageUrls[0]" [alt]="p.name" style="width:100%;height:100%;object-fit:cover">
                     <i *ngIf="!p.imageUrls?.length" class="bi bi-box-seam text-purple"></i>
                   </div>
                   <span class="fw-600 text-dark">{{ p.name }}</span>
@@ -161,15 +177,11 @@
               </td>
               <td class="fw-700 text-purple">${{ p.price | number:'1.2-2' }}</td>
               <td>
-                <span class="badge"
-                      [style.background]="p.quantity > 0 ? '#F0FDF4' : '#FEF2F2'"
-                      [style.color]="p.quantity > 0 ? '#166534' : '#991B1B'"
-                      style="border:1px solid currentColor">{{ p.quantity }}</span>
+                <span class="badge" [style.background]="p.quantity > 0 ? '#F0FDF4' : '#FEF2F2'" [style.color]="p.quantity > 0 ? '#166534' : '#991B1B'" style="border:1px solid currentColor">{{ p.quantity }}</span>
               </td>
               <td>
-                <span class="badge" style="background:#EDE9FE;color:#7C3AED;border:1px solid #C4B5FD">
-                  <i class="bi bi-images me-1"></i>{{ p.imageUrls?.length || 0 }}
-                </span>
+                <span *ngIf="p.category" class="badge" style="background:#F3F4F6;color:#374151">{{ p.category }}</span>
+                <span *ngIf="!p.category" class="text-muted small">—</span>
               </td>
               <td>
                 <a [routerLink]="['/seller/products', p.id, 'edit']" class="btn btn-sm btn-outline-secondary" style="border-radius:8px">

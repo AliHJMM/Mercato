@@ -39,7 +39,15 @@ const routes: Routes = [
     canActivate: [AuthGuard]
   },
 
-  // Public product listing (lazy, last so it doesn't swallow other routes)
+  // Wishlist (lazy, CLIENT only)
+  {
+    path: 'wishlist',
+    loadChildren: () => import('./features/wishlist/wishlist.module').then(m => m.WishlistModule),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { role: 'CLIENT' }
+  },
+
+  // Public product listing + search (lazy, last so it doesn't swallow other routes)
   {
     path: '',
     loadChildren: () => import('./features/products/products.module').then(m => m.ProductsModule)

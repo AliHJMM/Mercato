@@ -4,7 +4,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { ProfileComponent } from './profile.component';
 
-// app-routing already matches 'profile' prefix; child route is ''
 const routes: Routes = [
   { path: '', component: ProfileComponent }
 ];

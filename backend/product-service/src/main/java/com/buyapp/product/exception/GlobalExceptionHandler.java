@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,22 +21,22 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AppException.class)
     public ResponseEntity<Map<String, Object>> handleAppException(AppException ex) {
-        return buildError(ex.getStatus(), ex.getMessage());
+        return buildError(ex.getStatus(), ex.getMessage(), null);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
-        return buildError(HttpStatus.FORBIDDEN, "Access denied: insufficient permissions");
+        return buildError(HttpStatus.FORBIDDEN, "Access denied: insufficient permissions", null);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<Map<String, Object>> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
-        return buildError(HttpStatus.METHOD_NOT_ALLOWED, "HTTP method not allowed: " + ex.getMethod());
+        return buildError(HttpStatus.METHOD_NOT_ALLOWED, "HTTP method not allowed: " + ex.getMethod(), null);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, Object>> handleMessageNotReadable(HttpMessageNotReadableException ex) {
-        return buildError(HttpStatus.BAD_REQUEST, "Malformed or invalid request body");
+        return buildError(HttpStatus.BAD_REQUEST, "Malformed or invalid request body", null);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -47,31 +46,25 @@ public class GlobalExceptionHandler {
             String field = ((FieldError) error).getField();
             fieldErrors.put(field, error.getDefaultMessage());
         });
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now().toString());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", "Validation Failed");
-        body.put("details", fieldErrors);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+        return buildError(HttpStatus.BAD_REQUEST, "Validation failed", fieldErrors);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNoResourceFound(NoResourceFoundException ex) {
-        return buildError(HttpStatus.NOT_FOUND, "Endpoint not found");
+        return buildError(HttpStatus.NOT_FOUND, "Endpoint not found", null);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
         log.error("Unexpected error: ", ex);
-        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
+        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", null);
     }
 
-    private ResponseEntity<Map<String, Object>> buildError(HttpStatus status, String message) {
+    private ResponseEntity<Map<String, Object>> buildError(HttpStatus status, String message, Object details) {
         Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now().toString());
-        body.put("status", status.value());
-        body.put("error", status.getReasonPhrase());
+        body.put("code", status.value());
         body.put("message", message);
+        body.put("details", details);
         return ResponseEntity.status(status).body(body);
     }
 }

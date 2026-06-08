@@ -2,104 +2,337 @@
 <div style="background:linear-gradient(135deg,#1A1A2E,#3B82F6);padding:2.5rem 0 5rem">
   <div class="container">
     <h1 style="color:#fff;font-size:1.75rem;font-weight:800;letter-spacing:-.03em;margin-bottom:.25rem">
-      <i class="bi bi-cart3 me-2"></i>Your Cart
+      <i class="bi bi-cart3 me-2"></i>Checkout
     </h1>
-    <p style="color:rgba(255,255,255,.6);margin:0;font-size:.9rem">
-      {{ items.length === 0 ? 'Your cart is empty' : items.length + ' item(s) · $' + (cartService.total | number:'1.2-2') + ' total' }}
-    </p>
+    <!-- Step indicator -->
+    <div class="d-flex gap-2 align-items-center mt-3" *ngIf="step < 5">
+      <ng-container *ngFor="let s of [1,2,3,4]; let i = index">
+        <div class="d-flex align-items-center gap-1">
+          <div [style.background]="step >= s ? '#fff' : 'rgba(255,255,255,.3)'"
+               [style.color]="step >= s ? '#1A1A2E' : '#fff'"
+               style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700">
+            {{ s }}
+          </div>
+          <span style="color:rgba(255,255,255,.8);font-size:.8rem">
+            {{ s === 1 ? 'Cart' : s === 2 ? 'Address' : s === 3 ? 'Payment' : 'Review' }}
+          </span>
+        </div>
+        <div *ngIf="i < 3" style="flex:1;height:2px;background:rgba(255,255,255,.3);max-width:32px"></div>
+      </ng-container>
+    </div>
   </div>
 </div>
 
 <div class="container" style="max-width:760px;margin-top:-3rem;padding-bottom:3rem">
 
-  <!-- Empty state -->
-  <div *ngIf="items.length === 0 && !orderPlaced" class="card p-5 text-center fade-in-up">
-    <div style="font-size:4rem;margin-bottom:1rem;color:#D1D5DB"><i class="bi bi-cart-x"></i></div>
-    <h4 class="fw-800 mb-2">Nothing here yet</h4>
-    <p class="text-muted mb-4">Browse the marketplace and add items to your cart.</p>
-    <button class="btn btn-primary px-5" (click)="continueShopping()">
-      <i class="bi bi-bag me-2"></i>Shop Now
-    </button>
-  </div>
-
-  <!-- Order placed confirmation -->
-  <div *ngIf="orderPlaced" class="card p-5 text-center fade-in-up">
-    <div style="font-size:4rem;margin-bottom:1rem;color:#10B981"><i class="bi bi-check-circle-fill"></i></div>
-    <h4 class="fw-800 mb-2">Order Placed!</h4>
-    <p class="text-muted mb-4">Thank you for your order. Stock has been updated.</p>
-    <div class="d-flex gap-3 justify-content-center flex-wrap">
-      <button class="btn btn-primary px-4" (click)="viewOrders()">
-        <i class="bi bi-bag-check me-2"></i>View My Orders
-      </button>
-      <button class="btn btn-outline-secondary px-4" (click)="continueShopping()">
-        <i class="bi bi-bag me-2"></i>Continue Shopping
+  <!-- ─── STEP 1: Cart ─── -->
+  <ng-container *ngIf="step === 1">
+    <div *ngIf="items.length === 0" class="card p-5 text-center fade-in-up">
+      <div style="font-size:4rem;margin-bottom:1rem;color:#D1D5DB"><i class="bi bi-cart-x"></i></div>
+      <h4 class="fw-800 mb-2">Nothing here yet</h4>
+      <p class="text-muted mb-4">Browse the marketplace and add items to your cart.</p>
+      <button class="btn btn-primary px-5" (click)="continueShopping()">
+        <i class="bi bi-bag me-2"></i>Shop Now
       </button>
     </div>
-  </div>
 
-  <!-- Cart items -->
-  <div *ngIf="items.length > 0 && !orderPlaced" class="fade-in-up">
-    <div class="card mb-3 p-3" *ngFor="let item of items">
-      <div class="d-flex gap-3 align-items-center">
-
-        <!-- Image -->
-        <div style="width:72px;height:72px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#F3F4F6">
-          <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="item.name"
-               style="width:100%;height:100%;object-fit:cover">
-          <div *ngIf="!item.imageUrl"
-               style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#D1D5DB;font-size:1.5rem">
-            <i class="bi bi-image"></i>
+    <div *ngIf="items.length > 0" class="fade-in-up">
+      <div class="card mb-3 p-3" *ngFor="let item of items">
+        <div class="d-flex gap-3 align-items-center">
+          <div style="width:72px;height:72px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#F3F4F6">
+            <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="item.name"
+                 style="width:100%;height:100%;object-fit:cover">
+            <div *ngIf="!item.imageUrl"
+                 style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#D1D5DB;font-size:1.5rem">
+              <i class="bi bi-image"></i>
+            </div>
           </div>
-        </div>
-
-        <!-- Info -->
-        <div class="flex-grow-1 min-width-0">
-          <div class="fw-700" style="font-size:.9375rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-            {{ item.name }}
+          <div class="flex-grow-1 min-width-0">
+            <div class="fw-700" style="font-size:.9375rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ item.name }}</div>
+            <div class="text-muted small">by {{ item.sellerName }}</div>
+            <div class="fw-700 mt-1" style="color:var(--color-primary)">${{ (item.price * item.quantity) | number:'1.2-2' }}</div>
           </div>
-          <div class="text-muted small">by {{ item.sellerName }}</div>
-          <div class="fw-700 mt-1" style="color:var(--color-primary)">
-            ${{ (item.price * item.quantity) | number:'1.2-2' }}
+          <div class="d-flex align-items-center gap-1" style="flex-shrink:0">
+            <button class="btn btn-sm" style="width:30px;height:30px;padding:0;border:1px solid #E5E7EB;border-radius:8px" (click)="decrement(item)"><i class="bi bi-dash"></i></button>
+            <span class="fw-700" style="min-width:24px;text-align:center">{{ item.quantity }}</span>
+            <button class="btn btn-sm" style="width:30px;height:30px;padding:0;border:1px solid #E5E7EB;border-radius:8px" (click)="increment(item)"><i class="bi bi-plus"></i></button>
           </div>
+          <button class="btn btn-sm text-danger" style="flex-shrink:0" (click)="remove(item)" title="Remove"><i class="bi bi-trash"></i></button>
         </div>
+      </div>
 
-        <!-- Qty controls -->
-        <div class="d-flex align-items-center gap-1" style="flex-shrink:0">
-          <button class="btn btn-sm" style="width:30px;height:30px;padding:0;border:1px solid #E5E7EB;border-radius:8px"
-                  (click)="decrement(item)">
-            <i class="bi bi-dash"></i>
-          </button>
-          <span class="fw-700" style="min-width:24px;text-align:center">{{ item.quantity }}</span>
-          <button class="btn btn-sm" style="width:30px;height:30px;padding:0;border:1px solid #E5E7EB;border-radius:8px"
-                  (click)="increment(item)">
-            <i class="bi bi-plus"></i>
-          </button>
+      <div class="card p-4 mt-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <span class="text-muted">Subtotal ({{ cartService.count }} items)</span>
+          <span class="fw-800 fs-5">${{ cartService.total | number:'1.2-2' }}</span>
         </div>
-
-        <!-- Remove -->
-        <button class="btn btn-sm text-danger" style="flex-shrink:0" (click)="remove(item)" title="Remove">
-          <i class="bi bi-trash"></i>
+        <button class="btn btn-primary w-100 py-2 mb-2" (click)="goToAddress()">
+          <i class="bi bi-arrow-right me-2"></i>Continue to Delivery Address
+        </button>
+        <button class="btn w-100 py-2" style="border:1px solid #E5E7EB" (click)="continueShopping()">
+          <i class="bi bi-arrow-left me-2"></i>Continue Shopping
+        </button>
+        <button class="btn btn-link text-danger btn-sm mt-2" (click)="cartService.clearCart()">
+          <i class="bi bi-trash me-1"></i>Clear cart
         </button>
       </div>
     </div>
+  </ng-container>
 
-    <!-- Summary -->
-    <div class="card p-4 mt-3">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="text-muted">Subtotal ({{ cartService.count }} items)</span>
-        <span class="fw-800 fs-5">${{ cartService.total | number:'1.2-2' }}</span>
+  <!-- ─── STEP 2: Delivery Address ─── -->
+  <ng-container *ngIf="step === 2">
+    <div class="card p-4 fade-in-up" [formGroup]="addressForm">
+      <div class="d-flex align-items-center gap-2 mb-4">
+        <div style="width:36px;height:36px;background:#EFF6FF;border-radius:10px;display:flex;align-items:center;justify-content:center">
+          <i class="bi bi-geo-alt text-primary"></i>
+        </div>
+        <h5 class="fw-800 mb-0">Delivery Address</h5>
       </div>
-      <button class="btn btn-primary w-100 py-2 mb-2" (click)="placeOrder()" [disabled]="placingOrder">
-        <span *ngIf="placingOrder" class="spinner-border spinner-border-sm me-2"></span>
-        <i *ngIf="!placingOrder" class="bi bi-credit-card me-2"></i>
-        {{ placingOrder ? 'Placing Order...' : 'Place Order' }}
-      </button>
-      <button class="btn w-100 py-2" style="border:1px solid #E5E7EB" (click)="continueShopping()">
-        <i class="bi bi-arrow-left me-2"></i>Continue Shopping
-      </button>
-      <button class="btn btn-link text-danger btn-sm mt-2" (click)="cartService.clearCart()">
-        <i class="bi bi-trash me-1"></i>Clear cart
-      </button>
+
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label fw-600">Full Name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" formControlName="fullName" placeholder="John Doe"
+                 [class.is-invalid]="f('fullName').invalid && f('fullName').touched">
+          <div class="invalid-feedback">
+            <span *ngIf="f('fullName').errors?.['required']">Full name is required.</span>
+            <span *ngIf="f('fullName').errors?.['minlength']">At least 2 characters.</span>
+          </div>
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-600">Street Address <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" formControlName="street" placeholder="123 Main Street"
+                 [class.is-invalid]="f('street').invalid && f('street').touched">
+          <div class="invalid-feedback">Street address is required.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-600">City <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" formControlName="city" placeholder="Springfield"
+                 [class.is-invalid]="f('city').invalid && f('city').touched">
+          <div class="invalid-feedback">City is required.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-600">State / Province <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" formControlName="state" placeholder="IL"
+                 [class.is-invalid]="f('state').invalid && f('state').touched">
+          <div class="invalid-feedback">State is required.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-600">Zip / Postal Code <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" formControlName="zipCode" placeholder="62701"
+                 [class.is-invalid]="f('zipCode').invalid && f('zipCode').touched">
+          <div class="invalid-feedback">Zip code is required.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-600">Country <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" formControlName="country" placeholder="United States"
+                 [class.is-invalid]="f('country').invalid && f('country').touched">
+          <div class="invalid-feedback">Country is required.</div>
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-600">Phone Number <span class="text-danger">*</span></label>
+          <input type="tel" class="form-control" formControlName="phone" placeholder="+1 555 000 111"
+                 [class.is-invalid]="f('phone').invalid && f('phone').touched">
+          <div class="invalid-feedback">
+            <span *ngIf="f('phone').errors?.['required']">Phone is required.</span>
+            <span *ngIf="f('phone').errors?.['pattern']">Enter a valid phone number.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-3 mt-4">
+        <button class="btn btn-outline-secondary px-4" (click)="backToCart()">
+          <i class="bi bi-arrow-left me-2"></i>Back to Cart
+        </button>
+        <button class="btn btn-primary px-5" (click)="goToPayment()">
+          Continue to Payment <i class="bi bi-arrow-right ms-2"></i>
+        </button>
+      </div>
     </div>
-  </div>
+  </ng-container>
+
+  <!-- ─── STEP 3: Payment Method ─── -->
+  <ng-container *ngIf="step === 3">
+    <div class="card p-4 fade-in-up" [formGroup]="paymentForm">
+      <div class="d-flex align-items-center gap-2 mb-4">
+        <div style="width:36px;height:36px;background:#EFF6FF;border-radius:10px;display:flex;align-items:center;justify-content:center">
+          <i class="bi bi-credit-card text-primary"></i>
+        </div>
+        <h5 class="fw-800 mb-0">Payment Method</h5>
+      </div>
+
+      <!-- Payment options -->
+      <div class="d-flex flex-column gap-3 mb-4">
+        <label *ngFor="let opt of paymentOptions"
+               class="d-flex align-items-center gap-3 p-3 rounded-3"
+               style="cursor:pointer;border:2px solid;transition:all .15s"
+               [style.border-color]="selectedMethod === opt.value ? 'var(--color-primary)' : '#E5E7EB'"
+               [style.background]="selectedMethod === opt.value ? '#F0F7FF' : '#fff'">
+          <input type="radio" formControlName="method" [value]="opt.value" style="width:18px;height:18px;accent-color:var(--color-primary)">
+          <i class="bi fs-4" [ngClass]="opt.icon"
+             [style.color]="selectedMethod === opt.value ? 'var(--color-primary)' : '#6B7280'"></i>
+          <div>
+            <div class="fw-700 small">{{ opt.label }}</div>
+            <div class="text-muted" style="font-size:.78rem">{{ opt.desc }}</div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Credit Card fields -->
+      <div *ngIf="selectedMethod === 'CREDIT_CARD'" class="row g-3 mb-4 fade-in-up">
+        <div class="col-12">
+          <label class="form-label fw-600">Card Number <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" formControlName="cardNumber"
+                 placeholder="1234 5678 9012 3456" maxlength="19"
+                 [class.is-invalid]="p('cardNumber').invalid && p('cardNumber').touched">
+          <div class="invalid-feedback">Enter a valid 16-digit card number.</div>
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-600">Cardholder Name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" formControlName="cardHolder"
+                 placeholder="John Doe"
+                 [class.is-invalid]="p('cardHolder').invalid && p('cardHolder').touched">
+          <div class="invalid-feedback">Cardholder name is required.</div>
+        </div>
+        <div class="col-6">
+          <label class="form-label fw-600">Expiry <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" formControlName="cardExpiry"
+                 placeholder="MM/YY" maxlength="5"
+                 [class.is-invalid]="p('cardExpiry').invalid && p('cardExpiry').touched">
+          <div class="invalid-feedback">Enter MM/YY format.</div>
+        </div>
+        <div class="col-6">
+          <label class="form-label fw-600">CVV <span class="text-danger">*</span></label>
+          <input type="password" class="form-control" formControlName="cardCvv"
+                 placeholder="•••" maxlength="4"
+                 [class.is-invalid]="p('cardCvv').invalid && p('cardCvv').touched">
+          <div class="invalid-feedback">Enter 3 or 4 digit CVV.</div>
+        </div>
+        <div class="col-12">
+          <div class="alert mb-0" style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;color:#92400E;font-size:.82rem">
+            <i class="bi bi-shield-check me-2"></i>This is a simulated payment. No real charges will be made.
+          </div>
+        </div>
+      </div>
+
+      <!-- PayPal fields -->
+      <div *ngIf="selectedMethod === 'PAYPAL'" class="mb-4 fade-in-up">
+        <label class="form-label fw-600">PayPal Email <span class="text-danger">*</span></label>
+        <input type="email" class="form-control" formControlName="paypalEmail"
+               placeholder="you@paypal.com"
+               [class.is-invalid]="p('paypalEmail').invalid && p('paypalEmail').touched">
+        <div class="invalid-feedback">Enter a valid PayPal email.</div>
+        <div class="alert mt-3 mb-0" style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;color:#92400E;font-size:.82rem">
+          <i class="bi bi-shield-check me-2"></i>This is a simulated payment. No real charges will be made.
+        </div>
+      </div>
+
+      <div class="d-flex gap-3">
+        <button class="btn btn-outline-secondary px-4" (click)="backToAddress()">
+          <i class="bi bi-arrow-left me-2"></i>Back
+        </button>
+        <button class="btn btn-primary px-5" (click)="goToReview()">
+          Review Order <i class="bi bi-arrow-right ms-2"></i>
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ─── STEP 4: Review ─── -->
+  <ng-container *ngIf="step === 4">
+    <div class="fade-in-up">
+      <!-- Address Summary -->
+      <div class="card p-4 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-geo-alt text-primary"></i>
+            <span class="fw-700">Delivery to</span>
+          </div>
+          <button class="btn btn-link btn-sm p-0" (click)="backToAddress()">Edit</button>
+        </div>
+        <div class="text-muted small" style="line-height:1.6">
+          <strong>{{ addressForm.value.fullName }}</strong><br>
+          {{ addressForm.value.street }}, {{ addressForm.value.city }}, {{ addressForm.value.state }} {{ addressForm.value.zipCode }}<br>
+          {{ addressForm.value.country }} · {{ addressForm.value.phone }}
+        </div>
+      </div>
+
+      <!-- Payment Summary -->
+      <div class="card p-4 mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi text-primary" [ngClass]="getPaymentIcon(selectedMethod)"></i>
+            <span class="fw-700">Payment</span>
+          </div>
+          <button class="btn btn-link btn-sm p-0" (click)="backToPayment()">Edit</button>
+        </div>
+        <div class="text-muted small mt-2">{{ getPaymentLabel(selectedMethod) }}
+          <span *ngIf="selectedMethod === 'CREDIT_CARD'"> ending in {{ p('cardNumber').value?.slice(-4) }}</span>
+          <span *ngIf="selectedMethod === 'PAYPAL'"> — {{ p('paypalEmail').value }}</span>
+        </div>
+      </div>
+
+      <!-- Items Summary -->
+      <div class="card p-4 mb-3">
+        <h6 class="fw-700 mb-3"><i class="bi bi-bag me-2"></i>Order Items ({{ items.length }})</h6>
+        <div *ngFor="let item of items; let last = last"
+             class="d-flex gap-3 align-items-center py-2"
+             [style.border-bottom]="!last ? '1px solid #F3F4F6' : 'none'">
+          <div style="width:48px;height:48px;border-radius:8px;overflow:hidden;background:#F3F4F6;flex-shrink:0">
+            <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="item.name" style="width:100%;height:100%;object-fit:cover">
+            <div *ngIf="!item.imageUrl" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#D1D5DB"><i class="bi bi-image"></i></div>
+          </div>
+          <div class="flex-grow-1 min-width-0">
+            <div class="fw-600 small">{{ item.name }}</div>
+            <div class="text-muted" style="font-size:.78rem">by {{ item.sellerName }} · Qty: {{ item.quantity }}</div>
+          </div>
+          <div class="fw-700 small" style="color:var(--color-primary)">${{ (item.price * item.quantity) | number:'1.2-2' }}</div>
+        </div>
+      </div>
+
+      <!-- Total & CTA -->
+      <div class="card p-4">
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Subtotal</span>
+          <span class="fw-600">${{ cartService.total | number:'1.2-2' }}</span>
+        </div>
+        <div class="d-flex justify-content-between mb-3">
+          <span class="text-muted">Delivery</span>
+          <span class="fw-600 text-success">Free</span>
+        </div>
+        <div class="d-flex justify-content-between mb-4" style="border-top:1px solid #E5E7EB;padding-top:.75rem">
+          <span class="fw-800 fs-5">Total</span>
+          <span class="fw-800 fs-5" style="color:var(--color-primary)">${{ cartService.total | number:'1.2-2' }}</span>
+        </div>
+
+        <button class="btn btn-primary w-100 py-2 mb-2 fw-700" (click)="confirmOrder()" [disabled]="placingOrder">
+          <span *ngIf="placingOrder" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!placingOrder" class="bi bi-check2-circle me-2"></i>
+          {{ placingOrder ? 'Placing Order...' : 'Place Order' }}
+        </button>
+        <button class="btn btn-outline-secondary w-100 py-2" (click)="backToPayment()">
+          <i class="bi bi-arrow-left me-2"></i>Back
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ─── STEP 5: Confirmation ─── -->
+  <ng-container *ngIf="step === 5">
+    <div class="card p-5 text-center fade-in-up">
+      <div style="font-size:4rem;margin-bottom:1rem;color:#10B981"><i class="bi bi-check-circle-fill"></i></div>
+      <h4 class="fw-800 mb-2">Order Placed!</h4>
+      <p class="text-muted mb-1">Thank you for your order.</p>
+      <p class="text-muted small mb-4">Order ID: <code>{{ placedOrderId }}</code></p>
+      <div class="d-flex gap-3 justify-content-center flex-wrap">
+        <button class="btn btn-primary px-4" (click)="viewOrders()">
+          <i class="bi bi-bag-check me-2"></i>View My Orders
+        </button>
+        <button class="btn btn-outline-secondary px-4" (click)="continueShopping()">
+          <i class="bi bi-bag me-2"></i>Continue Shopping
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
 </div>

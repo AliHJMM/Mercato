@@ -37,7 +37,8 @@ export class ProductFormComponent implements OnInit {
       name: ['', [Validators.required, Validators.maxLength(255)]],
       description: [''],
       price: [null, [Validators.required, Validators.min(0.01)]],
-      quantity: [null, [Validators.required, Validators.min(0)]]
+      quantity: [null, [Validators.required, Validators.min(0)]],
+      category: ['']
     });
 
     this.productId = this.route.snapshot.paramMap.get('id');
@@ -50,7 +51,8 @@ export class ProductFormComponent implements OnInit {
             name: product.name,
             description: product.description,
             price: product.price,
-            quantity: product.quantity
+            quantity: product.quantity,
+            category: product.category || ''
           });
           this.imageUrls = [...(product.imageUrls || [])];
           this.loading = false;

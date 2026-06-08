@@ -22,6 +22,11 @@
             <i class="bi bi-grid me-1"></i>Marketplace
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/search" routerLinkActive="active">
+            <i class="bi bi-search me-1"></i>Search
+          </a>
+        </li>
         <ng-container *ngIf="isSeller()">
           <li class="nav-item">
             <a class="nav-link" routerLink="/seller/dashboard" routerLinkActive="active">
@@ -84,6 +89,11 @@
                   <i class="bi bi-bag-check me-2 text-purple"></i>My Orders
                 </a>
               </li>
+              <li *ngIf="isClient()">
+                <a class="dropdown-item rounded-2 mx-1" style="width:calc(100% - .5rem)" routerLink="/wishlist">
+                  <i class="bi bi-heart me-2 text-purple"></i>My Wishlist
+                </a>
+              </li>
               <li *ngIf="isSeller()">
                 <a class="dropdown-item rounded-2 mx-1" style="width:calc(100% - .5rem)" routerLink="/seller/dashboard">
                   <i class="bi bi-speedometer2 me-2 text-purple"></i>Dashboard
@@ -103,6 +113,18 @@
         <li class="nav-item" *ngIf="isClient()">
           <a class="nav-link" routerLink="/orders" routerLinkActive="active" title="My Orders">
             <i class="bi bi-bag-check me-1"></i>My Orders
+          </a>
+        </li>
+
+        <!-- Wishlist icon (clients only) -->
+        <li class="nav-item" *ngIf="isClient()">
+          <a class="nav-link position-relative px-2" routerLink="/wishlist" title="My Wishlist">
+            <i class="bi bi-heart text-white" style="font-size:1.1rem"></i>
+            <span *ngIf="wishlistService.count > 0"
+                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill"
+                  style="background:#EC4899;font-size:.65rem;min-width:18px">
+              {{ wishlistService.count }}
+            </span>
           </a>
         </li>
 

@@ -52,6 +52,7 @@ public class ProductSeedRunner implements ApplicationRunner {
                 .map(this::toProduct)
                 .toList();
 
+
         productRepository.saveAll(products);
         log.info("Seeded {} products from {}.", products.size(), productsResource);
     }
@@ -75,6 +76,7 @@ public class ProductSeedRunner implements ApplicationRunner {
                 .description(seedProduct.description())
                 .price(seedProduct.price())
                 .quantity(seedProduct.quantity())
+                .category(seedProduct.category())
                 .sellerId(seedProduct.sellerId())
                 .sellerName(seedProduct.sellerName())
                 .imageUrls(seedProduct.imageUrls())
@@ -87,6 +89,7 @@ public class ProductSeedRunner implements ApplicationRunner {
             String description,
             Double price,
             Integer quantity,
+            String category,
             String sellerId,
             String sellerName,
             List<String> imageUrls

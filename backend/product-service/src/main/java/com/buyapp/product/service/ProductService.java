@@ -2,21 +2,28 @@ package com.buyapp.product.service;
 
 import com.buyapp.product.dto.ProductDto;
 import com.buyapp.product.dto.ProductRequest;
+import com.buyapp.product.dto.ProductSearchResponse;
 import com.buyapp.product.entity.Product;
 import com.buyapp.product.event.ProductEvent;
 import com.buyapp.product.exception.AppException;
 import com.buyapp.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +32,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final MongoTemplate mongoTemplate;
 
     public List<ProductDto> getAllProducts() {
         return productRepository.findAll()
@@ -45,12 +53,71 @@ public class ProductService {
                 .toList();
     }
 
+    public ProductSearchResponse searchProducts(String q, String category,
+                                                Double minPrice, Double maxPrice,
+                                                String sort, int page, int size) {
+        Query query = new Query();
+        List<Criteria> criteria = new ArrayList<>();
+
+        if (StringUtils.hasText(q)) {
+            criteria.add(new Criteria().orOperator(
+                    Criteria.where("name").regex(q, "i"),
+                    Criteria.where("description").regex(q, "i"),
+                    Criteria.where("category").regex(q, "i")
+            ));
+        }
+        if (StringUtils.hasText(category)) {
+            criteria.add(Criteria.where("category").regex(category, "i"));
+        }
+        if (minPrice != null) {
+            criteria.add(Criteria.where("price").gte(minPrice));
+        }
+        if (maxPrice != null) {
+            criteria.add(Criteria.where("price").lte(maxPrice));
+        }
+        if (!criteria.isEmpty()) {
+            query.addCriteria(new Criteria().andOperator(criteria.toArray(new Criteria[0])));
+        }
+
+        Sort sortSpec = switch (sort != null ? sort : "newest") {
+            case "price_asc" -> Sort.by(Sort.Direction.ASC, "price");
+            case "price_desc" -> Sort.by(Sort.Direction.DESC, "price");
+            case "name_asc" -> Sort.by(Sort.Direction.ASC, "name");
+            default -> Sort.by(Sort.Direction.DESC, "createdAt");
+        };
+
+        long total = mongoTemplate.count(query, Product.class);
+
+        query.with(PageRequest.of(page, size, sortSpec));
+        List<ProductDto> products = mongoTemplate.find(query, Product.class)
+                .stream()
+                .map(ProductDto::from)
+                .toList();
+
+        int totalPages = size > 0 ? (int) Math.ceil((double) total / size) : 0;
+
+        return ProductSearchResponse.builder()
+                .products(products)
+                .total(total)
+                .page(page)
+                .size(size)
+                .totalPages(totalPages)
+                .build();
+    }
+
+    public List<String> getDistinctCategories() {
+        return mongoTemplate.findDistinct("category", Product.class, String.class)
+                .stream()
+                .filter(c -> c != null && !c.isBlank())
+                .sorted()
+                .toList();
+    }
+
     public ProductDto createProduct(ProductRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String sellerId = (String) auth.getPrincipal();
-        String sellerName = sellerId; // Could be fetched from user-service, using id for now
+        String sellerName = sellerId;
 
-        // Extract username from JWT claims if available
         if (auth.getDetails() instanceof io.jsonwebtoken.Claims claims) {
             String username = claims.get("username", String.class);
             if (username != null) sellerName = username;
@@ -61,6 +128,7 @@ public class ProductService {
                 .description(request.getDescription())
                 .price(request.getPrice())
                 .quantity(request.getQuantity())
+                .category(request.getCategory())
                 .sellerId(sellerId)
                 .sellerName(sellerName)
                 .imageUrls(request.getImageUrls())
@@ -68,7 +136,6 @@ public class ProductService {
 
         product = productRepository.save(product);
 
-        // Publish PRODUCT_CREATED event
         try {
             kafkaTemplate.send("product-events", ProductEvent.builder()
                     .eventType("PRODUCT_CREATED")
@@ -92,11 +159,11 @@ public class ProductService {
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
         product.setQuantity(request.getQuantity());
+        product.setCategory(request.getCategory());
         if (request.getImageUrls() != null) {
             product.setImageUrls(request.getImageUrls());
         }
 
-        // Publish PRODUCT_UPDATED event
         try {
             kafkaTemplate.send("product-events", ProductEvent.builder()
                     .eventType("PRODUCT_UPDATED")

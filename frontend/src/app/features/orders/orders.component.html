@@ -4,11 +4,29 @@
     <h1 style="color:#fff;font-size:1.75rem;font-weight:800;letter-spacing:-.03em;margin-bottom:.25rem">
       <i class="bi bi-bag-check me-2"></i>My Orders
     </h1>
-    <p style="color:rgba(255,255,255,.6);margin:0;font-size:.9rem">Your purchase history</p>
+    <p style="color:rgba(255,255,255,.6);margin:0;font-size:.9rem">Track and manage your purchase history</p>
   </div>
 </div>
 
-<div class="container" style="max-width:800px;margin-top:-3rem;padding-bottom:3rem">
+<div class="container" style="max-width:840px;margin-top:-3rem;padding-bottom:3rem">
+
+  <!-- Search / Filter Bar -->
+  <div class="card p-3 mb-3 fade-in-up">
+    <div class="d-flex gap-3 align-items-center flex-wrap">
+      <div style="flex:1;min-width:180px">
+        <label class="form-label small text-muted mb-1">Filter by Status</label>
+        <select class="form-select form-select-sm" [(ngModel)]="selectedStatus" (change)="onStatusChange()">
+          <option value="">All Orders</option>
+          <option *ngFor="let s of statuses.slice(1)" [value]="s">{{ s }}</option>
+        </select>
+      </div>
+      <div class="align-self-end">
+        <button class="btn btn-outline-secondary btn-sm" (click)="loadOrders()">
+          <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Loading -->
   <div *ngIf="loading" class="card p-5 text-center fade-in-up">
@@ -23,18 +41,16 @@
   </div>
 
   <!-- Empty -->
-  <div *ngIf="!loading && !error && orders.length === 0" class="card p-5 text-center fade-in-up">
+  <div *ngIf="!loading && !error && filteredOrders.length === 0" class="card p-5 text-center fade-in-up">
     <div style="font-size:4rem;margin-bottom:1rem;color:#D1D5DB"><i class="bi bi-bag-x"></i></div>
-    <h4 class="fw-800 mb-2">No orders yet</h4>
-    <p class="text-muted mb-4">Browse the marketplace and place your first order!</p>
-    <a routerLink="/" class="btn btn-primary px-5">
-      <i class="bi bi-bag me-2"></i>Shop Now
-    </a>
+    <h4 class="fw-800 mb-2">No orders found</h4>
+    <p class="text-muted mb-4">{{ selectedStatus ? 'No orders with status ' + selectedStatus : 'Place your first order!' }}</p>
+    <a routerLink="/" class="btn btn-primary px-5"><i class="bi bi-bag me-2"></i>Shop Now</a>
   </div>
 
   <!-- Orders List -->
-  <div *ngIf="!loading && orders.length > 0" class="fade-in-up">
-    <div class="card mb-3" *ngFor="let order of orders">
+  <div *ngIf="!loading && filteredOrders.length > 0" class="fade-in-up">
+    <div class="card mb-3" *ngFor="let order of filteredOrders">
       <!-- Order Header -->
       <div class="p-3" style="border-bottom:1px solid #F3F4F6;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem">
         <div>
@@ -54,32 +70,48 @@
         </div>
       </div>
 
-      <!-- Order Items -->
-      <div class="p-3">
-        <div *ngFor="let item of order.items; let last = last"
+      <!-- Items (collapsed preview) -->
+      <div class="p-3" style="border-bottom:1px solid #F3F4F6">
+        <div *ngFor="let item of order.items.slice(0,2); let last = last"
              class="d-flex gap-3 align-items-center py-2"
              [style.border-bottom]="!last ? '1px solid #F9FAFB' : 'none'">
-          <!-- Image -->
-          <div style="width:56px;height:56px;border-radius:8px;overflow:hidden;flex-shrink:0;background:#F3F4F6;display:flex;align-items:center;justify-content:center">
+          <div style="width:48px;height:48px;border-radius:8px;overflow:hidden;flex-shrink:0;background:#F3F4F6;display:flex;align-items:center;justify-content:center">
             <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="item.productName"
-                 style="width:100%;height:100%;object-fit:cover"
-                 (error)="item.imageUrl = ''">
-            <i *ngIf="!item.imageUrl" class="bi bi-image" style="color:#D1D5DB;font-size:1.25rem"></i>
+                 style="width:100%;height:100%;object-fit:cover" (error)="item.imageUrl = ''">
+            <i *ngIf="!item.imageUrl" class="bi bi-image" style="color:#D1D5DB"></i>
           </div>
-          <!-- Info -->
           <div class="flex-grow-1 min-width-0">
-            <div class="fw-600" style="font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-              {{ item.productName }}
-            </div>
-            <div class="text-muted small">by {{ item.sellerName }}</div>
+            <div class="fw-600 small">{{ item.productName }}</div>
+            <div class="text-muted" style="font-size:.78rem">by {{ item.sellerName }} · Qty {{ item.quantity }}</div>
           </div>
-          <!-- Qty & Price -->
-          <div class="text-end flex-shrink-0">
-            <div class="fw-700" style="color:var(--color-primary)">${{ item.subtotal | number:'1.2-2' }}</div>
-            <div class="text-muted small">Qty: {{ item.quantity }} × ${{ item.price | number:'1.2-2' }}</div>
-          </div>
+          <div class="fw-700 small" style="color:var(--color-primary)">${{ item.subtotal | number:'1.2-2' }}</div>
         </div>
+        <div *ngIf="order.items.length > 2" class="text-muted small mt-1">
+          +{{ order.items.length - 2 }} more item(s)
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="p-3 d-flex gap-2 flex-wrap align-items-center">
+        <button class="btn btn-sm btn-outline-primary" (click)="viewDetail(order.id)">
+          <i class="bi bi-eye me-1"></i>View Details
+        </button>
+        <button *ngIf="canCancel(order)" class="btn btn-sm btn-outline-warning"
+                (click)="cancelOrder(order)" [disabled]="actionLoading[order.id]">
+          <span *ngIf="actionLoading[order.id]" class="spinner-border spinner-border-sm me-1"></span>
+          <i *ngIf="!actionLoading[order.id]" class="bi bi-x-circle me-1"></i>Cancel
+        </button>
+        <button *ngIf="canDelete(order)" class="btn btn-sm btn-outline-danger"
+                (click)="deleteOrder(order)" [disabled]="actionLoading[order.id]">
+          <i class="bi bi-trash me-1"></i>Remove
+        </button>
+        <button *ngIf="canRedo(order)" class="btn btn-sm btn-outline-success"
+                (click)="redoOrder(order)" [disabled]="actionLoading[order.id]">
+          <span *ngIf="actionLoading[order.id]" class="spinner-border spinner-border-sm me-1"></span>
+          <i *ngIf="!actionLoading[order.id]" class="bi bi-arrow-repeat me-1"></i>Re-order
+        </button>
       </div>
     </div>
   </div>
+
 </div>

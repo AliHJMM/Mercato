@@ -19,7 +19,10 @@ public class Order {
     private String buyerId;
     private List<OrderItem> items;
     private Double total;
-    private String status;
+    private OrderStatus status;
+    private PaymentMethod paymentMethod;
+    private DeliveryAddress deliveryAddress;
+    private LocalDateTime cancelledAt;
     @CreatedDate
     private LocalDateTime createdAt;
 }

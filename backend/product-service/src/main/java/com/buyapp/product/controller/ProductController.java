@@ -2,6 +2,7 @@ package com.buyapp.product.controller;
 
 import com.buyapp.product.dto.ProductDto;
 import com.buyapp.product.dto.ProductRequest;
+import com.buyapp.product.dto.ProductSearchResponse;
 import com.buyapp.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,23 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<List<ProductDto>> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ProductSearchResponse> searchProducts(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false, defaultValue = "newest") String sort,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "12") int size) {
+        return ResponseEntity.ok(productService.searchProducts(q, category, minPrice, maxPrice, sort, page, size));
+    }
+
+    @GetMapping("/categories")
+    public ResponseEntity<List<String>> getCategories() {
+        return ResponseEntity.ok(productService.getDistinctCategories());
     }
 
     @GetMapping("/{id}")
