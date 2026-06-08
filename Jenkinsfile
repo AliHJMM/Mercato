@@ -183,6 +183,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     dir("${MERCATO_DIR}/backend") {
+                        sh 'mvn compile -pl user-service,product-service,media-service,api-gateway,eureka-server -am -B'
                         sh '''
                             mvn sonar:sonar \
                                 -pl user-service,product-service,media-service,api-gateway,eureka-server \
