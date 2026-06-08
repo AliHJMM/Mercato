@@ -1,7 +1,6 @@
-package com.buyapp.product.dto;
+package com.buyapp.order.dto;
 
-import com.buyapp.product.entity.Order;
-import com.buyapp.product.entity.OrderStatus;
+import com.buyapp.order.entity.Order;
 import lombok.Builder;
 import lombok.Data;
 

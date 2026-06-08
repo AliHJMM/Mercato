@@ -1,4 +1,4 @@
-package com.buyapp.product.entity;
+package com.buyapp.order.entity;
 
 import lombok.*;
 

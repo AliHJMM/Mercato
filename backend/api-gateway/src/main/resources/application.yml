@@ -42,9 +42,9 @@ spring:
           filters:
             - StripPrefix=1
 
-        # Orders (handled by product-service)
+        # Orders (dedicated order-service)
         - id: order-service
-          uri: lb://product-service
+          uri: lb://order-service
           predicates:
             - Path=/api/orders/**
           filters:

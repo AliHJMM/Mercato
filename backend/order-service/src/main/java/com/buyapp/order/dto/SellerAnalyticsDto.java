@@ -1,4 +1,4 @@
-package com.buyapp.product.dto;
+package com.buyapp.order.dto;
 
 import lombok.Builder;
 import lombok.Data;

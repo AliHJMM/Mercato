@@ -1,7 +1,7 @@
-package com.buyapp.product.repository;
+package com.buyapp.order.repository;
 
-import com.buyapp.product.entity.Order;
-import com.buyapp.product.entity.OrderStatus;
+import com.buyapp.order.entity.Order;
+import com.buyapp.order.entity.OrderStatus;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
