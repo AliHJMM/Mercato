@@ -16,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +26,8 @@ public class MediaService {
     private static final Set<String> ALLOWED_MIME_TYPES = Set.of(
             "image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"
     );
+    private static final String TOPIC_MEDIA_EVENTS = "media-events";
+    private static final String EVENT_IMAGE_UPLOADED = "IMAGE_UPLOADED";
 
     private final MediaRepository mediaRepository;
     private final MinioService minioService;
@@ -53,8 +54,8 @@ public class MediaService {
 
         // Publish IMAGE_UPLOADED event
         try {
-            kafkaTemplate.send("media-events", MediaEvent.builder()
-                    .eventType("IMAGE_UPLOADED")
+            kafkaTemplate.send(TOPIC_MEDIA_EVENTS, MediaEvent.builder()
+                    .eventType(EVENT_IMAGE_UPLOADED)
                     .mediaId(media.getId())
                     .filename(objectName)
                     .url(media.getUrl())

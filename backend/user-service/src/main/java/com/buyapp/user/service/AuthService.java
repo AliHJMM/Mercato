@@ -22,6 +22,9 @@ import java.time.LocalDateTime;
 @Slf4j
 public class AuthService {
 
+    private static final String TOPIC_USER_EVENTS = "user-events";
+    private static final String EVENT_USER_REGISTERED = "USER_REGISTERED";
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
@@ -46,8 +49,8 @@ public class AuthService {
 
         // Publish user registered event
         try {
-            kafkaTemplate.send("user-events", UserEvent.builder()
-                    .eventType("USER_REGISTERED")
+            kafkaTemplate.send(TOPIC_USER_EVENTS, UserEvent.builder()
+                    .eventType(EVENT_USER_REGISTERED)
                     .userId(user.getId())
                     .username(user.getUsername())
                     .email(user.getEmail())

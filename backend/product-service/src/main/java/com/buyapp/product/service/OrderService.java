@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -80,7 +79,9 @@ public class OrderService {
         PaymentMethod paymentMethod = PaymentMethod.PAY_ON_DELIVERY;
         if (request.getPaymentMethod() != null) {
             try { paymentMethod = PaymentMethod.valueOf(request.getPaymentMethod()); }
-            catch (IllegalArgumentException ignored) {}
+            catch (IllegalArgumentException e) {
+                log.warn("Unknown payment method '{}', defaulting to PAY_ON_DELIVERY", request.getPaymentMethod());
+            }
         }
 
         Order order = Order.builder()
@@ -173,7 +174,7 @@ public class OrderService {
                     r.setQuantity(item.getQuantity());
                     return r;
                 })
-                .collect(Collectors.toList());
+                .toList();
         request.setItems(itemRequests);
         request.setPaymentMethod(original.getPaymentMethod() != null
                 ? original.getPaymentMethod().name() : PaymentMethod.PAY_ON_DELIVERY.name());
@@ -262,7 +263,7 @@ public class OrderService {
                         .totalQuantity(e.getValue()[0])
                         .totalSpent(productSpent.get(e.getKey())[0])
                         .build())
-                .collect(Collectors.toList());
+                .toList();
 
         List<UserAnalyticsDto.CategorySpendDto> topCategories = categorySpent.entrySet().stream()
                 .sorted((a, b) -> Double.compare(b.getValue()[0], a.getValue()[0]))
@@ -272,7 +273,7 @@ public class OrderService {
                         .totalSpent(e.getValue()[0])
                         .totalItems(categoryItems.get(e.getKey())[0])
                         .build())
-                .collect(Collectors.toList());
+                .toList();
 
         return UserAnalyticsDto.builder()
                 .totalSpent(totalSpent)
@@ -321,7 +322,7 @@ public class OrderService {
                         .unitsSold(e.getValue()[0])
                         .revenue(productRevenue.get(e.getKey())[0])
                         .build())
-                .collect(Collectors.toList());
+                .toList();
 
         return SellerAnalyticsDto.builder()
                 .totalRevenue(totalRevenue)
