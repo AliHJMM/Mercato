@@ -104,7 +104,7 @@ pipeline {
                 stage('Test: User Service') {
                     steps {
                         dir("${MERCATO_DIR}/backend") {
-                            sh 'mvn test -pl user-service -am -B -Dsurefire.failIfNoSpecifiedTests=false'
+                            sh 'mvn test -pl user-service -am -B -T 1 -Dsurefire.failIfNoSpecifiedTests=false'
                         }
                     }
                     post {
@@ -120,7 +120,7 @@ pipeline {
                 stage('Test: Product Service') {
                     steps {
                         dir("${MERCATO_DIR}/backend") {
-                            sh 'mvn test -pl product-service -am -B -Dsurefire.failIfNoSpecifiedTests=false'
+                            sh 'mvn test -pl product-service -am -B -T 1 -Dsurefire.failIfNoSpecifiedTests=false'
                         }
                     }
                     post {
@@ -136,7 +136,7 @@ pipeline {
                 stage('Test: Media Service') {
                     steps {
                         dir("${MERCATO_DIR}/backend") {
-                            sh 'mvn test -pl media-service -am -B -Dsurefire.failIfNoSpecifiedTests=false'
+                            sh 'mvn test -pl media-service -am -B -T 1 -Dsurefire.failIfNoSpecifiedTests=false'
                         }
                     }
                     post {
@@ -152,7 +152,7 @@ pipeline {
                 stage('Test: Order Service') {
                     steps {
                         dir("${MERCATO_DIR}/backend") {
-                            sh 'mvn test -pl order-service -am -B -Dsurefire.failIfNoSpecifiedTests=false'
+                            sh 'mvn test -pl order-service -am -B -T 1 -Dsurefire.failIfNoSpecifiedTests=false'
                         }
                     }
                     post {
@@ -199,7 +199,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     dir("${MERCATO_DIR}/backend") {
-                        sh 'mvn compile -pl user-service,product-service,media-service,api-gateway,eureka-server,order-service -am -B'
+                        sh 'mvn compile -pl user-service,product-service,media-service,api-gateway,eureka-server,order-service -am -B -T 1'
                         sh '''
                             mvn sonar:sonar \
                                 -pl user-service,product-service,media-service,api-gateway,eureka-server,order-service \
