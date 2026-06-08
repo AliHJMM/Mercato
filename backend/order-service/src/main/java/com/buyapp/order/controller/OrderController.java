@@ -1,7 +1,7 @@
-package com.buyapp.product.controller;
+package com.buyapp.order.controller;
 
-import com.buyapp.product.dto.*;
-import com.buyapp.product.service.OrderService;
+import com.buyapp.order.dto.*;
+import com.buyapp.order.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

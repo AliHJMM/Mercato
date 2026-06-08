@@ -42,7 +42,7 @@ pipeline {
         COMPOSE_PROJECT   = 'mercato'
 
         // Services built by Docker Compose (project prefix applied automatically)
-        BACKEND_SERVICES  = 'eureka-server api-gateway user-service product-service media-service'
+        BACKEND_SERVICES  = 'eureka-server api-gateway user-service product-service media-service order-service'
 
         // Notification recipient — override via Jenkins credential or env var
         NOTIFICATION_EMAIL = 'mercatojenkins@gmail.com'
@@ -149,6 +149,22 @@ pipeline {
                     }
                 }
 
+                stage('Test: Order Service') {
+                    steps {
+                        dir("${MERCATO_DIR}/backend") {
+                            sh 'mvn test -pl order-service -am -B -Dsurefire.failIfNoSpecifiedTests=false'
+                        }
+                    }
+                    post {
+                        always {
+                            junit(
+                                testResults:       "${MERCATO_DIR}/backend/order-service/target/surefire-reports/*.xml",
+                                allowEmptyResults: true
+                            )
+                        }
+                    }
+                }
+
                 // Frontend tests run inside a Docker container (Node + Chromium)
                 // so the Jenkins agent does not need Node or Chrome installed.
                 stage('Test: Frontend (Karma/Jasmine)') {
@@ -183,10 +199,10 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     dir("${MERCATO_DIR}/backend") {
-                        sh 'mvn compile -pl user-service,product-service,media-service,api-gateway,eureka-server -am -B'
+                        sh 'mvn compile -pl user-service,product-service,media-service,api-gateway,eureka-server,order-service -am -B'
                         sh '''
                             mvn sonar:sonar \
-                                -pl user-service,product-service,media-service,api-gateway,eureka-server \
+                                -pl user-service,product-service,media-service,api-gateway,eureka-server,order-service \
                                 -am \
                                 -B \
                                 -Dsonar.projectKey=AliHJMM_Mercato \

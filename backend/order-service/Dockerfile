@@ -9,12 +9,12 @@ COPY media-service/pom.xml media-service/pom.xml
 COPY order-service/pom.xml order-service/pom.xml
 RUN --mount=type=cache,target=/root/.m2 \
     mvn dependency:go-offline -DskipTests -B
-COPY user-service/src user-service/src
+COPY order-service/src order-service/src
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn package -pl user-service -am -DskipTests -B
+    mvn package -pl order-service -am -DskipTests -B
 
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-COPY --from=build /app/user-service/target/*.jar app.jar
-EXPOSE 8081
+COPY --from=build /app/order-service/target/*.jar app.jar
+EXPOSE 8084
 ENTRYPOINT ["java", "-jar", "app.jar"]
