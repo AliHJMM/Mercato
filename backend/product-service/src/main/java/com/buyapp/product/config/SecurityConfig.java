@@ -28,8 +28,9 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/products", "/products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/my").authenticated()
                         .requestMatchers(HttpMethod.GET, "/products/search", "/products/categories").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products", "/products/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .anyRequest().authenticated()
                 )
