@@ -154,30 +154,16 @@
         <!-- Most Bought Products -->
         <div class="card p-4 mb-3" *ngIf="analytics.mostBoughtProducts?.length">
           <h6 class="fw-700 mb-3"><i class="bi bi-star me-2 text-warning"></i>Most Bought Products</h6>
-          <div *ngFor="let p of analytics.mostBoughtProducts" class="mb-3">
-            <div class="d-flex justify-content-between mb-1">
-              <span class="small fw-600">{{ p.productName }}</span>
-              <span class="small text-muted">{{ p.totalQuantity }} units · ${{ p.totalSpent | number:'1.2-2' }}</span>
-            </div>
-            <div style="height:6px;background:#E5E7EB;border-radius:3px;overflow:hidden">
-              <div style="height:100%;background:linear-gradient(90deg,#3B82F6,#8B5CF6);border-radius:3px;transition:width .4s"
-                   [style.width]="(p.totalSpent / maxSpent() * 100) + '%'"></div>
-            </div>
+          <div style="height:200px;position:relative">
+            <app-chart *ngIf="mostBoughtChartConfig" [config]="mostBoughtChartConfig"></app-chart>
           </div>
         </div>
 
         <!-- Top Categories -->
         <div class="card p-4" *ngIf="analytics.topCategories?.length">
           <h6 class="fw-700 mb-3"><i class="bi bi-grid me-2 text-success"></i>Top Categories</h6>
-          <div *ngFor="let c of analytics.topCategories" class="mb-3">
-            <div class="d-flex justify-content-between mb-1">
-              <span class="small fw-600">{{ c.category }}</span>
-              <span class="small text-muted">${{ c.totalSpent | number:'1.2-2' }} · {{ c.totalItems }} items</span>
-            </div>
-            <div style="height:6px;background:#E5E7EB;border-radius:3px;overflow:hidden">
-              <div style="height:100%;background:linear-gradient(90deg,#10B981,#059669);border-radius:3px;transition:width .4s"
-                   [style.width]="(c.totalSpent / maxCategorySpent() * 100) + '%'"></div>
-            </div>
+          <div style="height:220px;position:relative">
+            <app-chart *ngIf="categoriesChartConfig" [config]="categoriesChartConfig"></app-chart>
           </div>
         </div>
 

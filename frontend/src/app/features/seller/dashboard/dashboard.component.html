@@ -117,26 +117,46 @@
     <!-- ─── Analytics ─── -->
     <div class="row g-4 mb-4" *ngIf="analytics && analytics.bestSellingProducts?.length">
       <div class="col-12">
-        <div class="card p-4">
-          <div class="d-flex align-items-center gap-2 mb-4">
-            <div style="width:32px;height:32px;background:#FFFBEB;border-radius:8px;display:flex;align-items:center;justify-content:center">
-              <i class="bi bi-graph-up" style="color:#F59E0B;font-size:.9rem"></i>
+        <div class="card p-3">
+          <div class="row g-0 text-center">
+            <div class="col-4 border-end">
+              <div class="fw-800 fs-5" style="color:#7C3AED">${{ analytics.totalRevenue | number:'1.2-2' }}</div>
+              <div class="text-muted small">Total Revenue</div>
             </div>
-            <h5 class="fw-800 mb-0">Best Selling Products</h5>
-            <span class="ms-auto badge" style="background:#FEF3C7;color:#92400E">
-              {{ analytics.totalUnitsSold }} units sold total
-            </span>
+            <div class="col-4 border-end">
+              <div class="fw-800 fs-5" style="color:#F59E0B">{{ analytics.totalUnitsSold }}</div>
+              <div class="text-muted small">Units Sold</div>
+            </div>
+            <div class="col-4">
+              <div class="fw-800 fs-5" style="color:#3B82F6">{{ analytics.totalOrdersProcessed }}</div>
+              <div class="text-muted small">Orders</div>
+            </div>
           </div>
-
-          <div *ngFor="let p of analytics.bestSellingProducts" class="mb-4">
-            <div class="d-flex justify-content-between mb-1">
-              <span class="fw-600 small">{{ p.productName }}</span>
-              <span class="text-muted small">{{ p.unitsSold }} units · ${{ p.revenue | number:'1.2-2' }}</span>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card p-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <div style="width:32px;height:32px;background:#EDE9FE;border-radius:8px;display:flex;align-items:center;justify-content:center">
+              <i class="bi bi-graph-up" style="color:#7C3AED;font-size:.9rem"></i>
             </div>
-            <div style="height:8px;background:#F3F4F6;border-radius:4px;overflow:hidden">
-              <div style="height:100%;background:linear-gradient(90deg,#F59E0B,#D97706);border-radius:4px;transition:width .4s"
-                   [style.width]="(p.revenue / maxRevenue() * 100) + '%'"></div>
+            <h6 class="fw-800 mb-0">Revenue by Product</h6>
+          </div>
+          <div style="height:220px;position:relative">
+            <app-chart *ngIf="revenueChartConfig" [config]="revenueChartConfig"></app-chart>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card p-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <div style="width:32px;height:32px;background:#FFFBEB;border-radius:8px;display:flex;align-items:center;justify-content:center">
+              <i class="bi bi-bag-check" style="color:#F59E0B;font-size:.9rem"></i>
             </div>
+            <h6 class="fw-800 mb-0">Units Sold by Product</h6>
+          </div>
+          <div style="height:220px;position:relative">
+            <app-chart *ngIf="unitsChartConfig" [config]="unitsChartConfig"></app-chart>
           </div>
         </div>
       </div>
