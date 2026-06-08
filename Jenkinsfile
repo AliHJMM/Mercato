@@ -214,7 +214,7 @@ pipeline {
             steps {
                 dir("${MERCATO_DIR}") {
                     echo "Building all Docker images..."
-                    sh 'docker compose build'
+                    sh 'docker-compose build'
 
                     echo "Tagging images with build label: ${env.BUILD_LABEL}"
                     sh """
@@ -264,8 +264,8 @@ pipeline {
             steps {
                 dir("${MERCATO_DIR}") {
                     echo "Deploying to ${params.ENVIRONMENT}..."
-                    sh 'docker compose down --remove-orphans --timeout 30 || true'
-                    sh 'docker compose up -d'
+                    sh 'docker-compose down --remove-orphans --timeout 30 || true'
+                    sh 'docker-compose up -d'
                     echo "All containers started. Waiting for services to initialize..."
                 }
             }
@@ -317,7 +317,7 @@ pipeline {
                 script {
                     echo "Deployment failed — restoring previous image versions..."
                     sh """
-                        docker compose -f ${MERCATO_DIR}/docker-compose.yml down --timeout 30 || true
+                        docker-compose -f ${MERCATO_DIR}/docker-compose.yml down --timeout 30 || true
 
                         for svc in ${BACKEND_SERVICES} frontend nginx-ssl; do
                             IMG="${COMPOSE_PROJECT}-\${svc}"
@@ -329,7 +329,7 @@ pipeline {
                             fi
                         done
 
-                        docker compose -f ${MERCATO_DIR}/docker-compose.yml up -d || \
+                        docker-compose -f ${MERCATO_DIR}/docker-compose.yml up -d || \
                             echo "WARNING: Rollback restart also failed — manual intervention required"
                     """
                 }
