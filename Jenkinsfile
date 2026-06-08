@@ -1,5 +1,5 @@
 pipeline {
-    // 
+    // Mercato CI/CD Pipeline
 
     // ─── Agent ───────────────────────────────────────────────────────────────
     agent any
