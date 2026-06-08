@@ -30,6 +30,11 @@ import java.util.List;
 @Slf4j
 public class ProductService {
 
+    private static final String TOPIC_PRODUCT_EVENTS = "product-events";
+    private static final String EVENT_PRODUCT_CREATED = "PRODUCT_CREATED";
+    private static final String EVENT_PRODUCT_UPDATED = "PRODUCT_UPDATED";
+    private static final String EVENT_PRODUCT_DELETED = "PRODUCT_DELETED";
+
     private final ProductRepository productRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final MongoTemplate mongoTemplate;
@@ -137,8 +142,8 @@ public class ProductService {
         product = productRepository.save(product);
 
         try {
-            kafkaTemplate.send("product-events", ProductEvent.builder()
-                    .eventType("PRODUCT_CREATED")
+            kafkaTemplate.send(TOPIC_PRODUCT_EVENTS, ProductEvent.builder()
+                    .eventType(EVENT_PRODUCT_CREATED)
                     .productId(product.getId())
                     .productName(product.getName())
                     .sellerId(product.getSellerId())
@@ -165,8 +170,8 @@ public class ProductService {
         }
 
         try {
-            kafkaTemplate.send("product-events", ProductEvent.builder()
-                    .eventType("PRODUCT_UPDATED")
+            kafkaTemplate.send(TOPIC_PRODUCT_EVENTS, ProductEvent.builder()
+                    .eventType(EVENT_PRODUCT_UPDATED)
                     .productId(product.getId())
                     .productName(product.getName())
                     .sellerId(product.getSellerId())
@@ -186,8 +191,8 @@ public class ProductService {
         productRepository.deleteById(id);
 
         try {
-            kafkaTemplate.send("product-events", ProductEvent.builder()
-                    .eventType("PRODUCT_DELETED")
+            kafkaTemplate.send(TOPIC_PRODUCT_EVENTS, ProductEvent.builder()
+                    .eventType(EVENT_PRODUCT_DELETED)
                     .productId(id)
                     .productName(product.getName())
                     .sellerId(product.getSellerId())

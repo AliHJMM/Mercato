@@ -19,6 +19,10 @@ import java.time.LocalDateTime;
 @Slf4j
 public class UserService {
 
+    private static final String TOPIC_USER_EVENTS = "user-events";
+    private static final String EVENT_USER_UPDATED = "USER_UPDATED";
+    private static final String EVENT_USER_DELETED = "USER_DELETED";
+
     private final UserRepository userRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
@@ -49,8 +53,8 @@ public class UserService {
 
         if (usernameChanged) {
             try {
-                kafkaTemplate.send("user-events", UserEvent.builder()
-                        .eventType("USER_UPDATED")
+                kafkaTemplate.send(TOPIC_USER_EVENTS, UserEvent.builder()
+                        .eventType(EVENT_USER_UPDATED)
                         .userId(userId)
                         .username(saved.getUsername())
                         .timestamp(LocalDateTime.now())
@@ -70,8 +74,8 @@ public class UserService {
         log.info("User {} deleted their account", userId);
 
         try {
-            kafkaTemplate.send("user-events", UserEvent.builder()
-                    .eventType("USER_DELETED")
+            kafkaTemplate.send(TOPIC_USER_EVENTS, UserEvent.builder()
+                    .eventType(EVENT_USER_DELETED)
                     .userId(userId)
                     .role(user.getRole().name())
                     .timestamp(LocalDateTime.now())
