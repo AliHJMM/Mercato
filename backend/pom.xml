@@ -88,6 +88,20 @@
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>0.8.11</version>
+                    <configuration>
+                        <excludes>
+                            <!-- Lombok-generated boilerplate: DTOs, entities, events -->
+                            <exclude>**/dto/**</exclude>
+                            <exclude>**/entity/**</exclude>
+                            <exclude>**/event/**</exclude>
+                            <!-- Infrastructure / wiring — no logic to test -->
+                            <exclude>**/config/**</exclude>
+                            <exclude>**/consumer/**</exclude>
+                            <exclude>**/repository/**</exclude>
+                            <exclude>**/security/**</exclude>
+                            <exclude>**/*Application.class</exclude>
+                        </excludes>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>prepare-agent</id>

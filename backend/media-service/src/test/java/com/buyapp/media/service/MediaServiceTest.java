@@ -183,4 +183,101 @@ class MediaServiceTest {
                 .isInstanceOf(AppException.class)
                 .hasMessageContaining("not found");
     }
+
+    @Test
+    void uploadImage_validGif_success() {
+        byte[] gifBytes = new byte[]{0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00};
+        MockMultipartFile file = new MockMultipartFile("file", "anim.gif", "image/gif", gifBytes);
+
+        when(minioService.uploadFile(any())).thenReturn("object-uuid.gif");
+        when(mediaRepository.save(any())).thenAnswer(i -> {
+            Media m = i.getArgument(0);
+            m.setId("media-3");
+            return m;
+        });
+
+        MediaDto result = mediaService.uploadImage(file, "prod-1");
+
+        assertThat(result.getMimeType()).isEqualTo("image/gif");
+    }
+
+    @Test
+    void uploadImage_validWebp_success() {
+        byte[] webpBytes = new byte[]{0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00};
+        MockMultipartFile file = new MockMultipartFile("file", "image.webp", "image/webp", webpBytes);
+
+        when(minioService.uploadFile(any())).thenReturn("object-uuid.webp");
+        when(mediaRepository.save(any())).thenAnswer(i -> {
+            Media m = i.getArgument(0);
+            m.setId("media-4");
+            return m;
+        });
+
+        MediaDto result = mediaService.uploadImage(file, null);
+
+        assertThat(result.getMimeType()).isEqualTo("image/webp");
+    }
+
+    @Test
+    void uploadImage_validSvg_success() {
+        byte[] svgBytes = "<svg xmlns".getBytes();
+        MockMultipartFile file = new MockMultipartFile("file", "icon.svg", "image/svg+xml", svgBytes);
+
+        when(minioService.uploadFile(any())).thenReturn("object-uuid.svg");
+        when(mediaRepository.save(any())).thenAnswer(i -> {
+            Media m = i.getArgument(0);
+            m.setId("media-5");
+            return m;
+        });
+
+        MediaDto result = mediaService.uploadImage(file, null);
+
+        assertThat(result.getMimeType()).isEqualTo("image/svg+xml");
+    }
+
+    @Test
+    void uploadImage_emptyFile_throws400() {
+        MockMultipartFile file = new MockMultipartFile("file", "empty.jpg", "image/jpeg", new byte[0]);
+
+        assertThatThrownBy(() -> mediaService.uploadImage(file, null))
+                .isInstanceOf(AppException.class)
+                .hasMessageContaining("required");
+    }
+
+    @Test
+    void uploadImage_kafkaFailure_stillReturnsDto() {
+        MockMultipartFile file = new MockMultipartFile("file", "test.jpg", "image/jpeg", jpegBytes());
+
+        when(minioService.uploadFile(any())).thenReturn("object-uuid.jpg");
+        when(mediaRepository.save(any())).thenAnswer(i -> {
+            Media m = i.getArgument(0);
+            m.setId("media-6");
+            return m;
+        });
+        doThrow(new RuntimeException("Kafka down")).when(kafkaTemplate).send(anyString(), any());
+
+        MediaDto result = mediaService.uploadImage(file, "prod-1");
+
+        assertThat(result).isNotNull();
+        assertThat(result.getMimeType()).isEqualTo("image/jpeg");
+    }
+
+    @Test
+    void getMediaEntity_exists_returnsMedia() {
+        Media media = buildMedia("media-1");
+        when(mediaRepository.findById("media-1")).thenReturn(Optional.of(media));
+
+        Media result = mediaService.getMediaEntity("media-1");
+
+        assertThat(result.getId()).isEqualTo("media-1");
+    }
+
+    @Test
+    void getMediaEntity_notFound_throws404() {
+        when(mediaRepository.findById("missing")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> mediaService.getMediaEntity("missing"))
+                .isInstanceOf(AppException.class)
+                .hasMessageContaining("not found");
+    }
 }

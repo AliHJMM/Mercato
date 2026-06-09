@@ -147,4 +147,54 @@ class ProductServiceTest {
         assertThat(dto.getName()).isEqualTo("New Name");
         assertThat(dto.getCategory()).isEqualTo("Electronics");
     }
+
+    @Test
+    void getAllProducts_returnsList() {
+        Product p1 = Product.builder().id("p1").name("Laptop").price(999.0).quantity(5)
+                .sellerId(SELLER_ID).sellerName("Seller").category("Electronics").imageUrls(List.of()).build();
+        Product p2 = Product.builder().id("p2").name("Phone").price(499.0).quantity(10)
+                .sellerId(SELLER_ID).sellerName("Seller").category("Electronics").imageUrls(List.of()).build();
+
+        when(productRepository.findAll()).thenReturn(List.of(p1, p2));
+
+        List<ProductDto> result = productService.getAllProducts();
+
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(ProductDto::getName).containsExactly("Laptop", "Phone");
+    }
+
+    @Test
+    void getMyProducts_returnsSellersProducts() {
+        Product product = Product.builder().id("p1").name("Monitor").price(299.0).quantity(3)
+                .sellerId(SELLER_ID).sellerName("Seller").category("Peripherals").imageUrls(List.of()).build();
+
+        when(productRepository.findBySellerId(SELLER_ID)).thenReturn(List.of(product));
+
+        List<ProductDto> result = productService.getMyProducts();
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getSellerId()).isEqualTo(SELLER_ID);
+    }
+
+    @Test
+    void getDistinctCategories_returnsSorted() {
+        when(mongoTemplate.findDistinct("category", Product.class, String.class))
+                .thenReturn(List.of("Electronics", "Clothing", "Books"));
+
+        List<String> result = productService.getDistinctCategories();
+
+        assertThat(result).containsExactly("Books", "Clothing", "Electronics");
+    }
+
+    @Test
+    void deleteProduct_owner_success() {
+        Product product = Product.builder()
+                .id("prod-1").name("Widget").price(5.0).quantity(5)
+                .sellerId(SELLER_ID).sellerName("Seller").imageUrls(List.of()).build();
+
+        when(productRepository.findById("prod-1")).thenReturn(Optional.of(product));
+
+        assertThatCode(() -> productService.deleteProduct("prod-1")).doesNotThrowAnyException();
+        verify(productRepository).deleteById("prod-1");
+    }
 }
