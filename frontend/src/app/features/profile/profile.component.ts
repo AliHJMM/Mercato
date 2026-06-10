@@ -8,7 +8,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { OrderService } from '../../core/services/order.service';
 import { ToastrService } from 'ngx-toastr';
 import { Media } from '../../core/models/media.model';
-import { UserAnalytics } from '../../core/models/order.model';
+import { UserAnalytics, SellerAnalytics } from '../../core/models/order.model';
 import { ChartConfiguration } from 'chart.js';
 
 @Component({
@@ -24,11 +24,18 @@ export class ProfileComponent implements OnInit {
   mediaLibrary: Media[] = [];
   loadingMedia = false;
 
+  // Client analytics
   analytics: UserAnalytics | null = null;
   analyticsLoading = false;
-
+  activitySummaryChartConfig: ChartConfiguration | null = null;
   mostBoughtChartConfig: ChartConfiguration | null = null;
   categoriesChartConfig: ChartConfiguration | null = null;
+
+  // Seller analytics
+  sellerAnalytics: SellerAnalytics | null = null;
+  sellerAnalyticsLoading = false;
+  sellerRevenueChartConfig: ChartConfiguration | null = null;
+  sellerUnitsChartConfig: ChartConfiguration | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -59,6 +66,9 @@ export class ProfileComponent implements OnInit {
     if (this.authService.isClient()) {
       this.loadAnalytics();
     }
+    if (this.authService.isSeller()) {
+      this.loadSellerAnalytics();
+    }
   }
 
   loadAnalytics(): void {
@@ -73,7 +83,52 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  loadSellerAnalytics(): void {
+    this.sellerAnalyticsLoading = true;
+    this.orderService.getSellerAnalytics().subscribe({
+      next: (a) => {
+        this.sellerAnalytics = a;
+        this.buildSellerCharts(a);
+        this.sellerAnalyticsLoading = false;
+      },
+      error: () => { this.sellerAnalyticsLoading = false; }
+    });
+  }
+
   private buildUserCharts(a: UserAnalytics): void {
+    this.activitySummaryChartConfig = {
+      type: 'bar',
+      data: {
+        labels: ['Total Spent ($)', 'Orders Placed'],
+        datasets: [{
+          label: 'Activity',
+          data: [a.totalSpent, a.totalOrders],
+          backgroundColor: ['rgba(59,130,246,0.8)', 'rgba(139,92,246,0.8)'],
+          borderColor: ['#3B82F6', '#8B5CF6'],
+          borderWidth: 1,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ctx.dataIndex === 0
+                ? ` $${Number(ctx.raw).toFixed(2)}`
+                : ` ${ctx.raw} orders`
+            }
+          }
+        },
+        scales: {
+          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+          x: { grid: { display: false } }
+        }
+      }
+    };
+
     if (a.mostBoughtProducts?.length) {
       this.mostBoughtChartConfig = {
         type: 'bar',
@@ -128,6 +183,64 @@ export class ProfileComponent implements OnInit {
         }
       };
     }
+  }
+
+  private buildSellerCharts(a: SellerAnalytics): void {
+    if (!a.bestSellingProducts?.length) return;
+    const labels = a.bestSellingProducts.map(p => p.productName);
+
+    this.sellerRevenueChartConfig = {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Revenue ($)',
+          data: a.bestSellingProducts.map(p => p.revenue),
+          backgroundColor: 'rgba(124,58,237,0.8)',
+          borderColor: '#7C3AED',
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: (ctx) => ` $${Number(ctx.parsed.x).toFixed(2)}` } }
+        },
+        scales: {
+          x: { beginAtZero: true, ticks: { callback: (v) => `$${v}` }, grid: { color: 'rgba(0,0,0,0.05)' } },
+          y: { grid: { display: false } }
+        }
+      }
+    };
+
+    this.sellerUnitsChartConfig = {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Units Sold',
+          data: a.bestSellingProducts.map(p => p.unitsSold),
+          backgroundColor: 'rgba(245,158,11,0.8)',
+          borderColor: '#F59E0B',
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(0,0,0,0.05)' } },
+          y: { grid: { display: false } }
+        }
+      }
+    };
   }
 
   get username() { return this.form.get('username')!; }

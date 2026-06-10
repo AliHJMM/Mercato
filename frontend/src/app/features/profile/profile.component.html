@@ -135,19 +135,26 @@
       </div>
 
       <ng-container *ngIf="!analyticsLoading && analytics">
-        <!-- Summary Cards -->
-        <div class="row g-3 mb-4">
-          <div class="col-6">
-            <div class="card p-3 text-center">
-              <div class="fw-800 fs-4 text-primary">${{ analytics.totalSpent | number:'1.2-2' }}</div>
-              <div class="text-muted small">Total Spent</div>
+        <!-- Activity Summary Chart (Total Spent + Orders Placed) -->
+        <div class="card p-4 mb-3">
+          <h6 class="fw-700 mb-1"><i class="bi bi-activity me-2 text-primary"></i>Spending & Orders Overview</h6>
+          <p class="text-muted small mb-3">Total Spent ($) and Orders Placed at a glance</p>
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <div class="p-3 rounded-3 text-center" style="background:#EFF6FF">
+                <div class="fw-800 fs-4 text-primary">${{ analytics.totalSpent | number:'1.2-2' }}</div>
+                <div class="text-muted small">Total Spent</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="p-3 rounded-3 text-center" style="background:#F5F3FF">
+                <div class="fw-800 fs-4" style="color:#8B5CF6">{{ analytics.totalOrders }}</div>
+                <div class="text-muted small">Orders Placed</div>
+              </div>
             </div>
           </div>
-          <div class="col-6">
-            <div class="card p-3 text-center">
-              <div class="fw-800 fs-4" style="color:#8B5CF6">{{ analytics.totalOrders }}</div>
-              <div class="text-muted small">Orders Placed</div>
-            </div>
+          <div style="height:180px;position:relative">
+            <app-chart *ngIf="activitySummaryChartConfig" [config]="activitySummaryChartConfig"></app-chart>
           </div>
         </div>
 
@@ -161,7 +168,7 @@
 
         <!-- Top Categories -->
         <div class="card p-4" *ngIf="analytics.topCategories?.length">
-          <h6 class="fw-700 mb-3"><i class="bi bi-grid me-2 text-success"></i>Top Categories</h6>
+          <h6 class="fw-700 mb-3"><i class="bi bi-grid me-2 text-success"></i>Spending by Category</h6>
           <div style="height:220px;position:relative">
             <app-chart *ngIf="categoriesChartConfig" [config]="categoriesChartConfig"></app-chart>
           </div>
@@ -169,6 +176,70 @@
 
         <div *ngIf="!analytics.mostBoughtProducts?.length && !analytics.topCategories?.length" class="card p-4 text-center text-muted">
           <i class="bi bi-bag-x fs-2 mb-2 d-block"></i>No order history yet. Place your first order!
+        </div>
+      </ng-container>
+    </ng-container>
+
+    <!-- ─── Analytics (SELLER only) ─── -->
+    <ng-container *ngIf="authService.isSeller()">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <div style="width:32px;height:32px;background:#EDE9FE;border-radius:8px;display:flex;align-items:center;justify-content:center">
+          <i class="bi bi-graph-up text-purple" style="font-size:.9rem"></i>
+        </div>
+        <h5 class="fw-800 mb-0">Sales Analytics</h5>
+      </div>
+
+      <div *ngIf="sellerAnalyticsLoading" class="text-center py-4">
+        <div class="spinner-border text-purple"></div>
+      </div>
+
+      <ng-container *ngIf="!sellerAnalyticsLoading && sellerAnalytics">
+        <!-- Revenue + Units summary cards -->
+        <div class="card p-3 mb-3">
+          <div class="row g-0 text-center">
+            <div class="col-4 border-end">
+              <div class="fw-800 fs-5" style="color:#7C3AED">${{ sellerAnalytics.totalRevenue | number:'1.2-2' }}</div>
+              <div class="text-muted small">Money Gained</div>
+            </div>
+            <div class="col-4 border-end">
+              <div class="fw-800 fs-5" style="color:#F59E0B">{{ sellerAnalytics.totalUnitsSold }}</div>
+              <div class="text-muted small">Units Sold</div>
+            </div>
+            <div class="col-4">
+              <div class="fw-800 fs-5" style="color:#3B82F6">{{ sellerAnalytics.totalOrdersProcessed }}</div>
+              <div class="text-muted small">Orders</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Best Selling Products — Revenue chart -->
+        <div class="card p-4 mb-3" *ngIf="sellerAnalytics.bestSellingProducts?.length">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <div style="width:28px;height:28px;background:#EDE9FE;border-radius:8px;display:flex;align-items:center;justify-content:center">
+              <i class="bi bi-cash-stack" style="color:#7C3AED;font-size:.85rem"></i>
+            </div>
+            <h6 class="fw-700 mb-0">Best Selling Products — Revenue ($)</h6>
+          </div>
+          <div style="height:220px;position:relative">
+            <app-chart *ngIf="sellerRevenueChartConfig" [config]="sellerRevenueChartConfig"></app-chart>
+          </div>
+        </div>
+
+        <!-- Best Selling Products — Units Sold chart -->
+        <div class="card p-4" *ngIf="sellerAnalytics.bestSellingProducts?.length">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <div style="width:28px;height:28px;background:#FFFBEB;border-radius:8px;display:flex;align-items:center;justify-content:center">
+              <i class="bi bi-bag-check" style="color:#F59E0B;font-size:.85rem"></i>
+            </div>
+            <h6 class="fw-700 mb-0">Best Selling Products — Units Sold</h6>
+          </div>
+          <div style="height:220px;position:relative">
+            <app-chart *ngIf="sellerUnitsChartConfig" [config]="sellerUnitsChartConfig"></app-chart>
+          </div>
+        </div>
+
+        <div *ngIf="!sellerAnalytics.bestSellingProducts?.length" class="card p-4 text-center text-muted">
+          <i class="bi bi-shop fs-2 mb-2 d-block"></i>No sales yet. Start selling to see your analytics!
         </div>
       </ng-container>
     </ng-container>
