@@ -10,7 +10,8 @@ RUN apk add --no-cache openssl && \
     printf '[req]\ndefault_bits=2048\nprompt=no\ndefault_md=sha256\n\
 distinguished_name=dn\nx509_extensions=v3_req\n\
 [dn]\nC=US\nST=Local\nL=Dev\nO=Mercato\nOU=Platform\nCN=localhost\n\
-[v3_req]\nkeyUsage=keyEncipherment,dataEncipherment\n\
+[v3_req]\nbasicConstraints=critical,CA:TRUE\n\
+keyUsage=critical,digitalSignature,keyEncipherment,keyCertSign\n\
 extendedKeyUsage=serverAuth\nsubjectAltName=@alt_names\n\
 [alt_names]\nDNS.1=localhost\nIP.1=127.0.0.1\n' > /tmp/openssl.cnf && \
     openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
