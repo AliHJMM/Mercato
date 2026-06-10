@@ -74,8 +74,7 @@ class MinioServiceTest {
 
         String result = minioService.uploadFile(file);
 
-        assertThat(result).doesNotContain(" ", "(", ")");
-        assertThat(result).endsWith("_my_file__1_.jpg");
+        assertThat(result).doesNotContain(" ", "(", ")").endsWith("_my_file__1_.jpg");
     }
 
     @Test

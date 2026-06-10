@@ -22,7 +22,7 @@ import java.util.Set;
 @Slf4j
 public class MediaService {
 
-    private static final long MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
+    private static final long MAX_FILE_SIZE = 2L * 1024 * 1024; // 2 MB
     private static final Set<String> ALLOWED_MIME_TYPES = Set.of(
             "image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"
     );
@@ -142,8 +142,7 @@ public class MediaService {
         // WebP: starts with RIFF (52 49 46 46)
         if (header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46) return true;
         // SVG starts with <? or <s — allow content-type declaration to pass through
-        if (header[0] == '<') return true;
-        return false;
+        return header[0] == '<';
     }
 
     private String buildMediaUrl(String mediaId) {

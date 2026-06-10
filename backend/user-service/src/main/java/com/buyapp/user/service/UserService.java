@@ -35,14 +35,13 @@ public class UserService {
         User user = findById(userId);
         boolean usernameChanged = false;
 
-        if (request.getUsername() != null && !request.getUsername().isBlank()) {
-            if (!request.getUsername().equals(user.getUsername())) {
-                if (userRepository.existsByUsername(request.getUsername())) {
-                    throw new AppException("Username already taken", HttpStatus.CONFLICT);
-                }
-                user.setUsername(request.getUsername());
-                usernameChanged = true;
+        if (request.getUsername() != null && !request.getUsername().isBlank()
+                && !request.getUsername().equals(user.getUsername())) {
+            if (userRepository.existsByUsername(request.getUsername())) {
+                throw new AppException("Username already taken", HttpStatus.CONFLICT);
             }
+            user.setUsername(request.getUsername());
+            usernameChanged = true;
         }
 
         if (request.getAvatarUrl() != null) {

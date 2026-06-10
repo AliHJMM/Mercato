@@ -13,6 +13,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -57,7 +58,7 @@ public class ProductSeedRunner implements ApplicationRunner {
         log.info("Seeded {} products from {}.", products.size(), productsResource);
     }
 
-    private List<SeedProduct> readProducts() throws Exception {
+    private List<SeedProduct> readProducts() throws IOException {
         ClassPathResource resource = new ClassPathResource(productsResource);
         if (!resource.exists()) {
             return List.of();

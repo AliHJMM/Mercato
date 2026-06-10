@@ -312,8 +312,8 @@ class OrderServiceTest {
 
         UserAnalyticsDto result = orderService.getUserAnalytics();
 
-        assertThat(result.getTotalOrders()).isEqualTo(0);
-        assertThat(result.getTotalSpent()).isEqualTo(0.0);
+        assertThat(result.getTotalOrders()).isZero();
+        assertThat(result.getTotalSpent()).isZero();
     }
 
     @Test

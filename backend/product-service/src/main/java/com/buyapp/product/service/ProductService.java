@@ -34,6 +34,9 @@ public class ProductService {
     private static final String EVENT_PRODUCT_CREATED = "PRODUCT_CREATED";
     private static final String EVENT_PRODUCT_UPDATED = "PRODUCT_UPDATED";
     private static final String EVENT_PRODUCT_DELETED = "PRODUCT_DELETED";
+    private static final String FIELD_CATEGORY = "category";
+    private static final String FIELD_PRICE = "price";
+    private static final String LOG_PUBLISH_FAILED = "Failed to publish product event: {}";
 
     private final ProductRepository productRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -68,25 +71,25 @@ public class ProductService {
             criteria.add(new Criteria().orOperator(
                     Criteria.where("name").regex(q, "i"),
                     Criteria.where("description").regex(q, "i"),
-                    Criteria.where("category").regex(q, "i")
+                    Criteria.where(FIELD_CATEGORY).regex(q, "i")
             ));
         }
         if (StringUtils.hasText(category)) {
-            criteria.add(Criteria.where("category").regex(category, "i"));
+            criteria.add(Criteria.where(FIELD_CATEGORY).regex(category, "i"));
         }
         if (minPrice != null) {
-            criteria.add(Criteria.where("price").gte(minPrice));
+            criteria.add(Criteria.where(FIELD_PRICE).gte(minPrice));
         }
         if (maxPrice != null) {
-            criteria.add(Criteria.where("price").lte(maxPrice));
+            criteria.add(Criteria.where(FIELD_PRICE).lte(maxPrice));
         }
         if (!criteria.isEmpty()) {
             query.addCriteria(new Criteria().andOperator(criteria.toArray(new Criteria[0])));
         }
 
         Sort sortSpec = switch (sort != null ? sort : "newest") {
-            case "price_asc" -> Sort.by(Sort.Direction.ASC, "price");
-            case "price_desc" -> Sort.by(Sort.Direction.DESC, "price");
+            case "price_asc" -> Sort.by(Sort.Direction.ASC, FIELD_PRICE);
+            case "price_desc" -> Sort.by(Sort.Direction.DESC, FIELD_PRICE);
             case "name_asc" -> Sort.by(Sort.Direction.ASC, "name");
             default -> Sort.by(Sort.Direction.DESC, "createdAt");
         };
@@ -150,7 +153,7 @@ public class ProductService {
                     .timestamp(LocalDateTime.now())
                     .build());
         } catch (Exception e) {
-            log.warn("Failed to publish product event: {}", e.getMessage());
+            log.warn(LOG_PUBLISH_FAILED, e.getMessage());
         }
 
         return ProductDto.from(product);
@@ -178,7 +181,7 @@ public class ProductService {
                     .timestamp(LocalDateTime.now())
                     .build());
         } catch (Exception e) {
-            log.warn("Failed to publish product event: {}", e.getMessage());
+            log.warn(LOG_PUBLISH_FAILED, e.getMessage());
         }
 
         return ProductDto.from(productRepository.save(product));
@@ -199,7 +202,7 @@ public class ProductService {
                     .timestamp(LocalDateTime.now())
                     .build());
         } catch (Exception e) {
-            log.warn("Failed to publish product event: {}", e.getMessage());
+            log.warn(LOG_PUBLISH_FAILED, e.getMessage());
         }
     }
 

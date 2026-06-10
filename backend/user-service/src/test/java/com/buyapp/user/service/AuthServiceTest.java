@@ -70,7 +70,8 @@ class AuthServiceTest {
     void register_emailAlreadyExists_throws409() {
         when(userRepository.existsByEmail("john@test.com")).thenReturn(true);
 
-        assertThatThrownBy(() -> authService.register(buildRegisterRequest()))
+        RegisterRequest req = buildRegisterRequest();
+        assertThatThrownBy(() -> authService.register(req))
                 .isInstanceOf(AppException.class)
                 .hasMessageContaining("Email already in use");
     }
@@ -80,7 +81,8 @@ class AuthServiceTest {
         when(userRepository.existsByEmail("john@test.com")).thenReturn(false);
         when(userRepository.existsByUsername("johndoe")).thenReturn(true);
 
-        assertThatThrownBy(() -> authService.register(buildRegisterRequest()))
+        RegisterRequest req = buildRegisterRequest();
+        assertThatThrownBy(() -> authService.register(req))
                 .isInstanceOf(AppException.class)
                 .hasMessageContaining("Username already taken");
     }

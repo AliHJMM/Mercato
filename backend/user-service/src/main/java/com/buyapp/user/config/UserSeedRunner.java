@@ -15,6 +15,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -59,7 +60,7 @@ public class UserSeedRunner implements ApplicationRunner {
         log.info("Seeded {} users from {}.", users.size(), usersResource);
     }
 
-    private List<SeedUser> readUsers() throws Exception {
+    private List<SeedUser> readUsers() throws IOException {
         ClassPathResource resource = new ClassPathResource(usersResource);
         if (!resource.exists()) {
             return List.of();
