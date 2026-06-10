@@ -48,6 +48,11 @@ pipeline {
         NOTIFICATION_EMAIL = 'mercatojenkins@gmail.com'
     }
 
+    // ─── Triggers ─────────────────────────────────────────────────────────────
+    triggers {
+        githubPush()
+    }
+
     // ─── Pipeline Options ─────────────────────────────────────────────────────
     options {
         timestamps()
