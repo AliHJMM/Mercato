@@ -32,12 +32,7 @@ public class UserEventConsumer {
                 if (!userId.isBlank()) {
                     List<Media> mediaList = mediaRepository.findByUploadedBy(userId);
                     for (Media media : mediaList) {
-                        try {
-                            minioService.deleteFile(media.getFilename());
-                        } catch (Exception e) {
-                            log.warn("Failed to delete MinIO file {} for deleted user {}: {}", media.getFilename(), userId, e.getMessage());
-                        }
-                        mediaRepository.deleteById(media.getId());
+                        deleteMediaFile(media, userId);
                     }
                     if (!mediaList.isEmpty()) {
                         log.info("Deleted {} media file(s) for deleted user {}", mediaList.size(), userId);
@@ -47,5 +42,14 @@ public class UserEventConsumer {
         } catch (Exception e) {
             log.warn("Failed to process user event: {}", e.getMessage());
         }
+    }
+
+    private void deleteMediaFile(Media media, String userId) {
+        try {
+            minioService.deleteFile(media.getFilename());
+        } catch (Exception e) {
+            log.warn("Failed to delete MinIO file {} for deleted user {}: {}", media.getFilename(), userId, e.getMessage());
+        }
+        mediaRepository.deleteById(media.getId());
     }
 }
