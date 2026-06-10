@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProductService } from '../../../core/services/product.service';
+import { CartService } from '../../../core/services/cart.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { WishlistService } from '../../../core/services/wishlist.service';
 import { ToastrService } from 'ngx-toastr';
@@ -17,6 +18,7 @@ export class ProductListComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
+    public cartService: CartService,
     public authService: AuthService,
     public wishlistService: WishlistService,
     private toastr: ToastrService,
@@ -56,6 +58,17 @@ export class ProductListComponent implements OnInit {
     if (!product.createdAt) return false;
     const diffDays = (Date.now() - new Date(product.createdAt).getTime()) / (1000 * 60 * 60 * 24);
     return diffDays < 7;
+  }
+
+  addToCart(product: Product, event: Event): void {
+    event.stopPropagation();
+    if (!this.authService.isLoggedIn()) {
+      this.toastr.info('Please log in to add items to your cart.', 'Login Required');
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.cartService.addToCart(product);
+    this.toastr.success(`"${product.name}" added to cart!`, 'Cart Updated');
   }
 
   onStartSelling(): void {
