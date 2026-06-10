@@ -114,7 +114,7 @@ public class ProductService {
     }
 
     public List<String> getDistinctCategories() {
-        return mongoTemplate.findDistinct("category", Product.class, String.class)
+        return mongoTemplate.findDistinct(FIELD_CATEGORY, Product.class, String.class)
                 .stream()
                 .filter(c -> c != null && !c.isBlank())
                 .sorted()
