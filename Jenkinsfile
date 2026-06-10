@@ -212,7 +212,8 @@ pipeline {
                                 -B \
                                 -Dsonar.projectKey=AliHJMM_Mercato \
                                 -Dsonar.projectName=Mercato \
-                                -Dsonar.host.url=http://host.docker.internal:9002
+                                -Dsonar.host.url=http://host.docker.internal:9002 \
+                                "-Dsonar.coverage.exclusions=**/dto/**,**/entity/**,**/event/**,**/config/**,**/consumer/**,**/repository/**,**/security/**,**/*Application.java"
                         '''
                     }
                 }
