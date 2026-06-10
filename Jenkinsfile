@@ -204,10 +204,10 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     dir("${MERCATO_DIR}/backend") {
-                        sh 'mvn compile -pl user-service,product-service,media-service,api-gateway,eureka-server,order-service -am -B -T 1'
+                        sh 'mvn compile -pl user-service,product-service,media-service,order-service -am -B -T 1'
                         sh '''
                             mvn sonar:sonar \
-                                -pl user-service,product-service,media-service,api-gateway,eureka-server,order-service \
+                                -pl user-service,product-service,media-service,order-service \
                                 -am \
                                 -B \
                                 -Dsonar.projectKey=AliHJMM_Mercato \
