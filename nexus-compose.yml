@@ -1,0 +1,16 @@
+services:
+  nexus:
+    image: sonatype/nexus3:latest
+    container_name: nexus
+    restart: unless-stopped
+    # sonatype/nexus3 runs as the built-in 'nexus' user (UID 200) — not root
+    ports:
+      - "8091:8081"   # Nexus UI  (host:8091 → container:8081)
+      - "8086:8086"   # Docker registry  (configured in Nexus UI)
+    volumes:
+      - nexus-data:/nexus-data
+    environment:
+      - INSTALL4J_ADD_VM_PARAMS=-Xms512m -Xmx1200m -XX:MaxDirectMemorySize=2703m
+
+volumes:
+  nexus-data:

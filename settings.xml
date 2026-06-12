@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Maven settings.xml — Nexus integration template
+  Deploy this file to the Jenkins server at: ~/.m2/settings.xml
+  OR reference it directly in the pipeline with: mvn -s settings.xml
+  Credentials are injected at runtime via Jenkins credentials store (never hardcoded here).
+-->
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0
+          https://maven.apache.org/xsd/settings-1.2.0.xsd">
+
+    <!-- ── Server credentials (injected by Jenkins withCredentials) ─────── -->
+    <servers>
+        <server>
+            <id>nexus-releases</id>
+            <username>${nexus.username}</username>
+            <password>${nexus.password}</password>
+        </server>
+        <server>
+            <id>nexus-snapshots</id>
+            <username>${nexus.username}</username>
+            <password>${nexus.password}</password>
+        </server>
+        <server>
+            <id>nexus-public</id>
+            <username>${nexus.username}</username>
+            <password>${nexus.password}</password>
+        </server>
+    </servers>
+
+    <!-- ── Route ALL dependency downloads through Nexus proxy ───────────── -->
+    <mirrors>
+        <mirror>
+            <id>nexus-group</id>
+            <mirrorOf>*</mirrorOf>
+            <name>Nexus Public Group</name>
+            <url>${nexus.url}/repository/maven-public/</url>
+        </mirror>
+    </mirrors>
+
+    <!-- ── Active profile pointing repositories at Nexus ───────────────── -->
+    <profiles>
+        <profile>
+            <id>nexus</id>
+            <repositories>
+                <repository>
+                    <id>nexus-public</id>
+                    <name>Nexus Public</name>
+                    <url>${nexus.url}/repository/maven-public/</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>true</enabled></snapshots>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>nexus-public</id>
+                    <name>Nexus Public</name>
+                    <url>${nexus.url}/repository/maven-public/</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>true</enabled></snapshots>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+    </profiles>
+
+    <activeProfiles>
+        <activeProfile>nexus</activeProfile>
+    </activeProfiles>
+
+</settings>
