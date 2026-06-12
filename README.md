@@ -1,4 +1,4 @@
-# Buy-01 — Online Marketplace
+# Mercato — Online Marketplace
 
 Buy-01 is a full-featured online marketplace where **sellers** can list products and manage their catalog, while **buyers** browse and discover items — all through a clean, modern web interface.
 
