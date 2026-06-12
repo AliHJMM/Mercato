@@ -27,6 +27,11 @@
             <username>${nexus.username}</username>
             <password>${nexus.password}</password>
         </server>
+        <server>
+            <id>nexus-group</id>
+            <username>${nexus.username}</username>
+            <password>${nexus.password}</password>
+        </server>
     </servers>
 
     <!-- ── Route ALL dependency downloads through Nexus proxy ───────────── -->
