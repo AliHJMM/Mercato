@@ -46,6 +46,11 @@ pipeline {
 
         // Notification recipient — override via Jenkins credential or env var
         NOTIFICATION_EMAIL = 'mercatojenkins@gmail.com'
+
+        // Nexus Repository Manager
+        NEXUS_URL             = 'http://host.docker.internal:8091'
+        NEXUS_DOCKER_REGISTRY = 'host.docker.internal:8086'
+        NEXUS_CREDENTIALS_ID  = 'nexus-credentials'
     }
 
     // ─── Triggers ─────────────────────────────────────────────────────────────
@@ -231,6 +236,28 @@ pipeline {
         }
 
         // ─────────────────────────────────────────────────────────────────────
+        stage('Publish to Nexus') {
+        // ─────────────────────────────────────────────────────────────────────
+            steps {
+                dir("${MERCATO_DIR}/backend") {
+                    withCredentials([usernamePassword(
+                        credentialsId: "${NEXUS_CREDENTIALS_ID}",
+                        usernameVariable: 'NEXUS_USER',
+                        passwordVariable: 'NEXUS_PASS'
+                    )]) {
+                        sh """
+                            mvn deploy -B -DskipTests \
+                                -s "${WORKSPACE}/${MERCATO_DIR}/settings.xml" \
+                                -Dnexus.url=${NEXUS_URL} \
+                                -Dnexus.username="\${NEXUS_USER}" \
+                                -Dnexus.password="\${NEXUS_PASS}"
+                        """
+                    }
+                }
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
         stage('Build Docker Images') {
         // ─────────────────────────────────────────────────────────────────────
             steps {
@@ -247,6 +274,36 @@ pipeline {
                                 echo "Tagged \${IMG}:${env.BUILD_LABEL}"
                             fi
                         done
+                    """
+                }
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        stage('Push Docker to Nexus') {
+        // ─────────────────────────────────────────────────────────────────────
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: "${NEXUS_CREDENTIALS_ID}",
+                    usernameVariable: 'NEXUS_USER',
+                    passwordVariable: 'NEXUS_PASS'
+                )]) {
+                    sh """
+                        echo "\${NEXUS_PASS}" | docker login ${NEXUS_DOCKER_REGISTRY} \
+                            -u "\${NEXUS_USER}" --password-stdin
+
+                        for svc in ${BACKEND_SERVICES} frontend; do
+                            IMG="${COMPOSE_PROJECT}-\${svc}"
+                            if docker image inspect "\${IMG}:latest" > /dev/null 2>&1; then
+                                docker tag "\${IMG}:latest" "${NEXUS_DOCKER_REGISTRY}/\${IMG}:${env.BUILD_LABEL}"
+                                docker tag "\${IMG}:latest" "${NEXUS_DOCKER_REGISTRY}/\${IMG}:latest"
+                                docker push "${NEXUS_DOCKER_REGISTRY}/\${IMG}:${env.BUILD_LABEL}"
+                                docker push "${NEXUS_DOCKER_REGISTRY}/\${IMG}:latest"
+                                echo "Pushed \${IMG} to Nexus"
+                            fi
+                        done
+
+                        docker logout ${NEXUS_DOCKER_REGISTRY}
                     """
                 }
             }

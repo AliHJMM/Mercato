@@ -33,7 +33,19 @@
         <spring-cloud.version>2023.0.1</spring-cloud.version>
         <jjwt.version>0.12.3</jjwt.version>
         <minio.version>8.5.7</minio.version>
+        <nexus.url>http://localhost:8091</nexus.url>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>nexus-releases</id>
+            <url>${nexus.url}/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <url>${nexus.url}/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencyManagement>
         <dependencies>
