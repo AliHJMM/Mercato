@@ -35,7 +35,7 @@ Mercato is a full-featured online marketplace where **sellers** can list product
 
 ```bash
 git clone <repo-url>
-cd buy-01
+cd Mercato
 ```
 
 **2. Start everything with one command**
