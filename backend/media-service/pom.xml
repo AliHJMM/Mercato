@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.buyapp</groupId>
         <artifactId>buy-01</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </parent>
 
     <artifactId>media-service</artifactId>
