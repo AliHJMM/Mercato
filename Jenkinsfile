@@ -184,7 +184,7 @@ pipeline {
                         catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
                             sh """
                                 docker run --rm \\
-                                    -v "\${WORKSPACE}/frontend":/app \\
+                                    -v "\${WORKSPACE}/${MERCATO_DIR}/frontend":/app \\
                                     -v mercato-npm-cache:/root/.npm \\
                                     -w /app \\
                                     --shm-size=2g \\
