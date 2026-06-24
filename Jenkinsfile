@@ -181,13 +181,13 @@ pipeline {
                     steps {
                         catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
                             sh """
-                                docker run --rm \\
-                                    -v "\${WORKSPACE}/${MERCATO_DIR}/frontend":/app \\
-                                    -w /app \\
-                                    --shm-size=2g \\
-                                    node:20-alpine \\
-                                    sh -c 'apk add --no-cache chromium chromium-chromedriver && npm install --quiet && npm run test -- --watch=false --browsers=ChromeHeadless --no-progress'
-                            """
+                        docker run --rm \\
+                            -v "\${WORKSPACE}/${MERCATO_DIR}/frontend":/app \\
+                            -w /app \\
+                            --shm-size=2g \\
+                            mercato-test-runner \\
+                            sh -c 'npm install --quiet && npm run test -- --watch=false --browsers=ChromeHeadless --no-progress'
+                    """
                         }
                     }
                     post {
