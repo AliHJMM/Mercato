@@ -177,23 +177,26 @@ pipeline {
 
                 // Frontend tests run inside a Docker container (Node + Chromium)
                 // so the Jenkins agent does not need Node or Chrome installed.
+                // Uses pre-built mercato-test-runner image (Chromium baked in).
+                // npm cache persisted via named Docker volume mercato-npm-cache.
                 stage('Test: Frontend (Karma/Jasmine)') {
                     steps {
                         catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
                             sh """
-                        docker run --rm \\
-                            -v "\${WORKSPACE}/${MERCATO_DIR}/frontend":/app \\
-                            -w /app \\
-                            --shm-size=2g \\
-                            mercato-test-runner \\
-                            sh -c 'npm install --quiet && npm run test -- --watch=false --browsers=ChromeHeadless --no-progress'
-                    """
+                                docker run --rm \\
+                                    -v "\${WORKSPACE}/frontend":/app \\
+                                    -v mercato-npm-cache:/root/.npm \\
+                                    -w /app \\
+                                    --shm-size=2g \\
+                                    mercato-test-runner \\
+                                    sh -c 'npm install --quiet && npm run test -- --watch=false --browsers=ChromeHeadless --no-progress'
+                            """
                         }
                     }
                     post {
                         always {
                             junit(
-                                testResults:       "${MERCATO_DIR}/frontend/test-results/**/*.xml",
+                                testResults:       "frontend/test-results/**/*.xml",
                                 allowEmptyResults: true
                             )
                         }
@@ -355,8 +358,8 @@ pipeline {
         // ─────────────────────────────────────────────────────────────────────
             steps {
                 script {
-                    echo "Waiting 60 s for services to finish initializing..."
-                    sleep(time: 60, unit: 'SECONDS')
+                    echo "Waiting 20 s for services to finish initializing..."
+                    sleep(time: 20, unit: 'SECONDS')
 
                     def endpoints = [
                         [name: 'Eureka Server',   url: 'http://host.docker.internal:8761/actuator/health'],
@@ -433,7 +436,7 @@ pipeline {
                     <table cellpadding="6" style="border-collapse:collapse;">
                         <tr><td><b>Job</b></td><td>${env.JOB_NAME}</td></tr>
                         <tr><td><b>Build #</b></td><td>${env.BUILD_NUMBER}</td></tr>
-                        <tr><td><b>Environment</b></td><td>${params.ENVIRONMENT}</td></tr>
+                        <tr><td><b>Environment</b></td><td>${env.ENVIRONMENT}</td></tr>
                         <tr><td><b>Branch</b></td><td>${params.MERCATO_BRANCH}</td></tr>
                         <tr><td><b>Commit</b></td><td>${env.MERCATO_COMMIT}</td></tr>
                         <tr><td><b>Duration</b></td><td>${currentBuild.durationString}</td></tr>
